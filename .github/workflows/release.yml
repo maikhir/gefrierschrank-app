@@ -1,0 +1,103 @@
+name: Create Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Extract version from tag
+      id: version
+      run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+      
+    - name: Extract features for release notes
+      id: features
+      run: |
+        VERSION="${{ steps.version.outputs.VERSION }}"
+        
+        # Extract features from FEATURES.md based on version
+        if [[ "$VERSION" == v1.0* ]]; then
+          SECTION="Core Features (Version 1.0)"
+        elif [[ "$VERSION" == v1.1* ]]; then
+          SECTION="Advanced Features (Version 1.1+)"
+        elif [[ "$VERSION" == v1.2* ]]; then
+          SECTION="Advanced Features (Version 1.1+)"
+        elif [[ "$VERSION" == v2.0* ]]; then
+          SECTION="Optional Features (Version 2.0+)"
+        else
+          SECTION="Core Features (Version 1.0)"
+        fi
+        
+        # Create release notes from FEATURES.md
+        cat > release_notes.md << 'EOF'
+        ## 🚀 Features in this Release
+        
+        This release includes the following features from our roadmap:
+        
+        EOF
+        
+        # Extract completed features from the appropriate section
+        awk -v section="$SECTION" '
+        /^## / { current_section = $0; in_target = 0 }
+        current_section ~ section { in_target = 1 }
+        in_target && /^\| .* \| ✅/ { 
+          gsub(/^\| /, "- ✅ ")
+          gsub(/ \| ✅.*/, "")
+          print $0
+        }
+        ' FEATURES.md >> release_notes.md
+        
+        # Add links to documentation
+        cat >> release_notes.md << 'EOF'
+        
+        ## 📚 Documentation
+        
+        - [Feature Roadmap](./FEATURES.md) - Complete feature list and status
+        - [Development Guide](./CLAUDE.md) - Development setup and commands
+        
+        ## 🐛 Bug Reports
+        
+        Found a bug? Please [create an issue](https://github.com/maikhir/gefrierschrank-app/issues/new).
+        
+        ## 📧 Newsletter
+        
+        Thank you for using Gefrierschrank App! This release brings us closer to a complete freezer management solution.
+        EOF
+        
+        echo "RELEASE_NOTES<<EOF" >> $GITHUB_OUTPUT
+        cat release_notes.md >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
+        
+    - name: Build Backend (Maven)
+      run: |
+        cd backend
+        chmod +x mvnw
+        ./mvnw clean package -DskipTests
+        
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        name: "Release ${{ steps.version.outputs.VERSION }}"
+        body: ${{ steps.features.outputs.RELEASE_NOTES }}
+        files: |
+          backend/target/*.jar
+          FEATURES.md
+          CLAUDE.md
+        generate_release_notes: true
+        prerelease: ${{ contains(steps.version.outputs.VERSION, 'alpha') || contains(steps.version.outputs.VERSION, 'beta') || contains(steps.version.outputs.VERSION, 'rc') }}
+        
+    - name: Update Feature Status
+      run: |
+        # This could be extended to automatically update FEATURES.md
+        # and mark implemented features as "Released" 
+        echo "Release ${{ steps.version.outputs.VERSION }} created successfully"
+        echo "Consider updating FEATURES.md to mark features as 📦 Released"

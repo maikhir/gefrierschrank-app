@@ -19,7 +19,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is a Spring Boot application (version 4.0.0-SNAPSHOT) with the following key characteristics:
 
-- **Java 17** - Target Java version
+- **Java 23** - Target Java version
 - **Package Structure**: `de.hirthe.gefrierschrankapp` - German naming suggests this is a freezer/refrigerator management app
 - **Spring Framework Stack**:
   - Spring Boot Web (REST APIs)
