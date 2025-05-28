@@ -50,7 +50,15 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
       
+    - name: Check if frontend exists
+      run: |
+        if [ ! -d "frontend" ] || [ ! -f "frontend/package.json" ]; then
+          echo "Frontend not yet implemented, skipping frontend tests"
+          exit 0
+        fi
+        
     - name: Set up Node.js
+      if: hashFiles('frontend/package.json') != ''
       uses: actions/setup-node@v4
       with:
         node-version: '18'
@@ -58,21 +66,25 @@ jobs:
         cache-dependency-path: frontend/package-lock.json
         
     - name: Install Frontend Dependencies
+      if: hashFiles('frontend/package.json') != ''
       run: |
         cd frontend
         npm ci
         
     - name: Lint Frontend Code
+      if: hashFiles('frontend/package.json') != ''
       run: |
         cd frontend
         npm run lint || echo "Lint not configured yet"
         
     - name: Run Frontend Tests
+      if: hashFiles('frontend/package.json') != ''
       run: |
         cd frontend
         npm test
         
     - name: Build Frontend
+      if: hashFiles('frontend/package.json') != ''
       run: |
         cd frontend
         npm run build
@@ -90,11 +102,19 @@ jobs:
       uses: docker/setup-buildx-action@v3
       
     - name: Build Backend Docker Image
+      if: hashFiles('backend/Dockerfile') != ''
       run: |
         cd backend
         docker build -t gefrierschrank-app-backend:latest .
         
     - name: Build Frontend Docker Image  
+      if: hashFiles('frontend/Dockerfile') != ''
       run: |
         cd frontend
         docker build -t gefrierschrank-app-frontend:latest .
+        
+    - name: Docker build summary
+      run: |
+        echo "✅ Docker build step completed"
+        echo "Backend Dockerfile exists: $([ -f backend/Dockerfile ] && echo 'Yes' || echo 'No')"
+        echo "Frontend Dockerfile exists: $([ -f frontend/Dockerfile ] && echo 'Yes' || echo 'No')"
