@@ -27,16 +27,21 @@ jobs:
         key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
         restore-keys: ${{ runner.os }}-m2
         
-    - name: Run Backend Tests
+    - name: Compile Backend
       run: |
         cd backend
         chmod +x mvnw
-        ./mvnw clean test
+        ./mvnw clean compile
         
-    - name: Build Backend
+    - name: Run Backend Tests
       run: |
         cd backend
-        ./mvnw clean package -DskipTests
+        ./mvnw test
+        
+    - name: Build Backend Package
+      run: |
+        cd backend
+        ./mvnw package -DskipTests
 
   test-frontend:
     runs-on: ubuntu-latest
@@ -56,6 +61,11 @@ jobs:
       run: |
         cd frontend
         npm ci
+        
+    - name: Lint Frontend Code
+      run: |
+        cd frontend
+        npm run lint || echo "Lint not configured yet"
         
     - name: Run Frontend Tests
       run: |

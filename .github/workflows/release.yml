@@ -24,6 +24,15 @@ jobs:
       run: |
         VERSION="${{ steps.version.outputs.VERSION }}"
         
+        # Determine if this is a beta/pre-release
+        if [[ "$VERSION" == *"beta"* || "$VERSION" == *"alpha"* || "$VERSION" == *"rc"* ]]; then
+          IS_PRERELEASE=true
+          RELEASE_TYPE="Beta"
+        else
+          IS_PRERELEASE=false
+          RELEASE_TYPE="Stable"
+        fi
+        
         # Extract features from FEATURES.md based on version
         if [[ "$VERSION" == v1.0* ]]; then
           SECTION="Core Features (Version 1.0)"
@@ -38,12 +47,22 @@ jobs:
         fi
         
         # Create release notes from FEATURES.md
-        cat > release_notes.md << 'EOF'
-        ## 🚀 Features in this Release
+        if [ "$IS_PRERELEASE" = true ]; then
+          cat > release_notes.md << EOF
+        ## 🧪 $RELEASE_TYPE Release - $VERSION
+        
+        ⚠️ **This is a beta release for testing purposes. Please report any issues.**
+        
+        ### Features in this Beta:
+        EOF
+        else
+          cat > release_notes.md << 'EOF'
+        ## 🚀 Stable Release Features
         
         This release includes the following features from our roadmap:
         
         EOF
+        fi
         
         # Extract completed features from the appropriate section
         awk -v section="$SECTION" '
@@ -57,7 +76,27 @@ jobs:
         ' FEATURES.md >> release_notes.md
         
         # Add links to documentation
-        cat >> release_notes.md << 'EOF'
+        if [ "$IS_PRERELEASE" = true ]; then
+          cat >> release_notes.md << 'EOF'
+        
+        ### 🧪 Beta Testing Guidelines
+        
+        - This is a **beta release** - expect potential bugs and issues
+        - Please test in a non-production environment first
+        - Report bugs with detailed steps to reproduce
+        - Beta feedback is crucial for stable release quality
+        
+        ### 📚 Documentation
+        
+        - [Feature Roadmap](./FEATURES.md) - Complete feature list and status
+        - [Development Guide](./CLAUDE.md) - Development setup and commands
+        
+        ### 🐛 Beta Bug Reports
+        
+        Found an issue in this beta? Please [create a bug report](https://github.com/maikhir/gefrierschrank-app/issues/new) with the label "beta".
+        EOF
+        else
+          cat >> release_notes.md << 'EOF'
         
         ## 📚 Documentation
         
@@ -68,10 +107,15 @@ jobs:
         
         Found a bug? Please [create an issue](https://github.com/maikhir/gefrierschrank-app/issues/new).
         
+        ## 🔧 Hotfix Support
+        
+        Critical bugs in this stable release will be fixed in patch releases (e.g., v1.0.1, v1.0.2).
+        
         ## 📧 Newsletter
         
-        Thank you for using Gefrierschrank App! This release brings us closer to a complete freezer management solution.
+        Thank you for using Gefrierschrank App! This stable release provides reliable functionality for managing your freezer inventory.
         EOF
+        fi
         
         echo "RELEASE_NOTES<<EOF" >> $GITHUB_OUTPUT
         cat release_notes.md >> $GITHUB_OUTPUT
@@ -94,6 +138,7 @@ jobs:
           CLAUDE.md
         generate_release_notes: true
         prerelease: ${{ contains(steps.version.outputs.VERSION, 'alpha') || contains(steps.version.outputs.VERSION, 'beta') || contains(steps.version.outputs.VERSION, 'rc') }}
+        make_latest: ${{ !contains(steps.version.outputs.VERSION, 'alpha') && !contains(steps.version.outputs.VERSION, 'beta') && !contains(steps.version.outputs.VERSION, 'rc') }}
         
     - name: Update Feature Status
       run: |
