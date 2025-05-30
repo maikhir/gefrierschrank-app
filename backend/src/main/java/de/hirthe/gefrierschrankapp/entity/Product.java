@@ -54,7 +54,7 @@ public class Product {
     @Column(name = "frozen_date", nullable = false)
     private LocalDate frozenDate = LocalDate.now();
     
-    @Future(message = "Expiration date must be in the future")
+    // Note: No @Future validation here to allow expired products for testing/import
     @Column(name = "expiration_date")
     private LocalDate expirationDate;
     

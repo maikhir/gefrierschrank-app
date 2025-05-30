@@ -27,7 +27,7 @@ public class CreateProductRequest {
     @PastOrPresent(message = "Frozen date cannot be in the future")
     private LocalDate frozenDate;
     
-    @Future(message = "Expiration date must be in the future")
+    // Note: Allow past dates for importing expired products
     private LocalDate expirationDate;
     
     @Size(max = 1000, message = "Notes must be less than 1000 characters")
