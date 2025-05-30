@@ -1,0 +1,65 @@
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+@import './base.css';
+
+/* Custom CSS Variables following our design system */
+:root {
+  /* Typography */
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-mono: 'Fira Code', monospace;
+}
+
+/* Global App Styles */
+#app {
+  font-family: var(--font-sans);
+  min-height: 100vh;
+  background-color: #f8fafc;
+}
+
+/* Custom Component Classes */
+.btn-primary {
+  @apply bg-primary-500 text-white px-4 py-2 rounded-md font-medium hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-opacity-50 transition-colors;
+}
+
+.btn-secondary {
+  @apply bg-secondary-100 text-secondary-700 px-4 py-2 rounded-md font-medium hover:bg-secondary-200 focus:outline-none focus:ring-2 focus:ring-secondary-500 focus:ring-opacity-50 transition-colors;
+}
+
+.btn-success {
+  @apply bg-success-500 text-white px-4 py-2 rounded-md font-medium hover:bg-success-600 focus:outline-none focus:ring-2 focus:ring-success-500 focus:ring-opacity-50 transition-colors;
+}
+
+.card {
+  @apply bg-white rounded-lg shadow border border-secondary-200 hover:shadow-md transition-shadow;
+}
+
+.badge-fresh {
+  @apply bg-success-50 text-success-600 px-2 py-1 rounded-md text-xs font-medium border border-success-200;
+}
+
+.badge-expiring {
+  @apply bg-warning-50 text-warning-600 px-2 py-1 rounded-md text-xs font-medium border border-warning-200;
+}
+
+.badge-critical {
+  @apply bg-orange-50 text-orange-600 px-2 py-1 rounded-md text-xs font-medium border border-orange-200;
+}
+
+.badge-expired {
+  @apply bg-red-50 text-red-600 px-2 py-1 rounded-md text-xs font-medium border border-red-200;
+}
+
+/* Input Styles */
+.input-base {
+  @apply block w-full px-3 py-2 border border-secondary-200 rounded-md shadow-sm text-secondary-900 placeholder:text-secondary-600 focus:outline-none focus:ring-primary-500 focus:border-primary-500;
+}
+
+.input-error {
+  @apply border-red-300 text-red-900 placeholder-red-300 focus:outline-none focus:ring-red-500 focus:border-red-500;
+}
+
+/* Loading Animation */
+.loading-spinner {
+  @apply animate-spin rounded-full h-4 w-4 border-b-2 border-current;
+}
