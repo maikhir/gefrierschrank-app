@@ -11,6 +11,19 @@ This is a **monorepo** with separate backend and frontend:
 
 ## Development Commands
 
+### Quick Start (All Services)
+```bash
+# Option 1: Using npm script (recommended)
+npm run dev                  # Start both backend and frontend
+npm run stop                 # Stop all services
+
+# Option 2: Using startup script
+./start-dev.sh               # Start services (Linux/macOS)
+./start-dev.sh stop          # Stop services (Linux/macOS)
+./start-dev.sh restart       # Restart services (Linux/macOS)
+start-dev.bat               # Windows
+```
+
 ### Backend (Spring Boot)
 ```bash
 cd backend
@@ -22,13 +35,23 @@ cd backend
 ./mvnw clean                 # Clean build artifacts
 ```
 
-### Frontend (when implemented)
+### Frontend (Vue.js)
 ```bash
 cd frontend
 npm install                  # Install dependencies
-npm start                    # Development server
-npm test                     # Run tests
+npm run dev                  # Development server
+npm run test                 # Run tests
 npm run build               # Production build
+```
+
+### Root Level Commands
+```bash
+npm run dev                  # Start both services
+npm run stop                 # Stop all services
+npm run credentials          # Show backend security credentials
+npm run build               # Build frontend
+npm run test                # Test both services
+npm run install:all         # Install all dependencies
 ```
 
 ### Git Workflow Commands

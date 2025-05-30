@@ -16,38 +16,38 @@ Eine moderne Web-Anwendung zur Verwaltung von Gefrierschrank-Inhalten mit respon
 ### Basis-Inventar Management
 | Feature | Status | Version | Beschreibung |
 |---------|--------|---------|--------------|
-| Produkt hinzufügen | ❌ | 1.0 | Neue Artikel zum Gefrierschrank hinzufügen |
-| Produkt bearbeiten | ❌ | 1.0 | Bestehende Artikel editieren |
-| Produkt löschen | ❌ | 1.0 | Artikel aus dem Inventar entfernen |
-| Inventar anzeigen | ❌ | 1.0 | Übersicht aller Gefrierschrank-Inhalte |
+| Produkt hinzufügen | ✅ | 1.0 | Neue Artikel zum Gefrierschrank hinzufügen |
+| Produkt bearbeiten | ✅ | 1.0 | Bestehende Artikel editieren |
+| Produkt löschen | ✅ | 1.0 | Artikel aus dem Inventar entfernen |
+| Inventar anzeigen | ✅ | 1.0 | Übersicht aller Gefrierschrank-Inhalte |
 
 ### Kategorisierung & Organisation
 | Feature | Status | Version | Beschreibung |
 |---------|--------|---------|--------------|
-| Kategorien verwalten | ❌ | 1.0 | Fleisch, Gemüse, Fertiggerichte, etc. |
-| Produkte kategorisieren | ❌ | 1.0 | Artikel zu Kategorien zuordnen |
-| Kategorie-Filter | ❌ | 1.0 | Inventar nach Kategorien filtern |
+| Kategorien verwalten | ✅ | 1.0 | Fleisch, Gemüse, Fertiggerichte, etc. |
+| Produkte kategorisieren | ✅ | 1.0 | Artikel zu Kategorien zuordnen |
+| Kategorie-Filter | ✅ | 1.0 | Inventar nach Kategorien filtern |
 
 ### Datums-Management
 | Feature | Status | Version | Beschreibung |
 |---------|--------|---------|--------------|
-| Einfrierdatum erfassen | ❌ | 1.0 | Datum des Einfrierens speichern |
-| Haltbarkeitsdatum berechnen | ❌ | 1.0 | Automatische Berechnung basierend auf Produkttyp |
-| Ablaufwarnung | ❌ | 1.0 | Visuelle Warnung bei ablaufenden Produkten |
+| Einfrierdatum erfassen | ✅ | 1.0 | Datum des Einfrierens speichern |
+| Haltbarkeitsdatum berechnen | ✅ | 1.0 | Automatische Berechnung basierend auf Produkttyp |
+| Ablaufwarnung | ✅ | 1.0 | Visuelle Warnung bei ablaufenden Produkten |
 
 ### Mengen & Standort
 | Feature | Status | Version | Beschreibung |
 |---------|--------|---------|--------------|
-| Mengenangaben | ❌ | 1.0 | Stückzahl, Gewicht (g/kg), Volumen |
-| Standort-Verwaltung | ❌ | 1.0 | Fächer, Schubladen, Bereiche definieren |
-| Standort zuweisen | ❌ | 1.0 | Produkte zu Standorten zuordnen |
+| Mengenangaben | ✅ | 1.0 | Stückzahl, Gewicht (g/kg), Volumen |
+| Standort-Verwaltung | ✅ | 1.0 | Fächer, Schubladen, Bereiche definieren |
+| Standort zuweisen | ✅ | 1.0 | Produkte zu Standorten zuordnen |
 
 ### Responsive Design
 | Feature | Status | Version | Beschreibung |
 |---------|--------|---------|--------------|
-| Desktop UI | ❌ | 1.0 | Optimiert für Laptop/Desktop |
-| Tablet UI | ❌ | 1.0 | Touch-optimiert für Tablets |
-| Mobile UI | ❌ | 1.0 | Smartphone-freundliche Oberfläche |
+| Desktop UI | ✅ | 1.0 | Optimiert für Laptop/Desktop |
+| Tablet UI | ✅ | 1.0 | Touch-optimiert für Tablets |
+| Mobile UI | ✅ | 1.0 | Smartphone-freundliche Oberfläche |
 
 ---
 
@@ -98,10 +98,10 @@ Eine moderne Web-Anwendung zur Verwaltung von Gefrierschrank-Inhalten mit respon
 - **Deployment:** Docker Container / k3s Cluster
 
 ### Frontend
-- **Framework:** [TBD - React/Vue.js/Angular]
-- **Styling:** [TBD - Bootstrap/Tailwind/Material UI]
-- **State Management:** [TBD]
-- **Build Tool:** [TBD]
+- **Framework:** Vue.js 3 + TypeScript
+- **Styling:** Tailwind CSS + Heroicons
+- **State Management:** Pinia
+- **Build Tool:** Vite
 
 ---
 

@@ -1,0 +1,32 @@
+{
+  "name": "gefrierschrank-app",
+  "version": "1.0.0",
+  "description": "Gefrierschrank Inventar Management App",
+  "scripts": {
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "cd backend && ./mvnw spring-boot:run",
+    "dev:frontend": "cd frontend && npm run dev",
+    "stop": "npm run stop:ports",
+    "stop:ports": "node scripts/stop-dev.js",
+    "credentials": "node scripts/show-credentials.js",
+    "build": "npm run build:frontend",
+    "build:frontend": "cd frontend && npm run build",
+    "test": "concurrently \"npm run test:backend\" \"npm run test:frontend\"",
+    "test:backend": "cd backend && ./mvnw test",
+    "test:frontend": "cd frontend && npm run test",
+    "install:all": "npm run install:frontend",
+    "install:frontend": "cd frontend && npm install"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "keywords": [
+    "inventory",
+    "management",
+    "freezer",
+    "spring-boot",
+    "vue"
+  ],
+  "author": "Maik Hirthe",
+  "license": "MIT"
+}
