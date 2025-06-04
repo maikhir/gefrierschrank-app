@@ -127,15 +127,78 @@
     </div>
 
     <!-- Products Grid -->
-    <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-      <ProductCard
-        v-for="product in filteredProducts"
-        :key="product.id"
-        :product="product"
-        @edit="editProduct"
-        @delete="deleteProduct"
-        @mark-used="markProductAsUsed"
-      />
+    <div v-else>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <ProductCard
+          v-for="product in paginatedProducts"
+          :key="product.id"
+          :product="product"
+          @edit="editProduct"
+          @delete="deleteProduct"
+          @mark-used="markProductAsUsed"
+        />
+      </div>
+
+      <!-- Pagination Controls -->
+      <div v-if="totalPages > 1" class="mt-8 flex items-center justify-between">
+        <div class="flex items-center space-x-2">
+          <span class="text-sm text-secondary-600">
+            Zeige {{ startItem }}-{{ endItem }} von {{ filteredProducts.length }} Produkten
+          </span>
+        </div>
+        
+        <div class="flex items-center space-x-2">
+          <!-- Previous Button -->
+          <button
+            @click="goToPage(currentPage - 1)"
+            :disabled="currentPage === 1"
+            :class="currentPage === 1 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-secondary-100'"
+            class="px-3 py-2 rounded-md border border-secondary-300 text-sm font-medium text-secondary-700 bg-white"
+          >
+            ← Zurück
+          </button>
+
+          <!-- Page Numbers -->
+          <div class="flex space-x-1">
+            <button
+              v-for="page in visiblePages"
+              :key="page"
+              @click="goToPage(page)"
+              :class="page === currentPage ? 'bg-primary-600 text-white' : 'bg-white text-secondary-700 hover:bg-secondary-100'"
+              class="px-3 py-2 rounded-md border border-secondary-300 text-sm font-medium"
+            >
+              {{ page }}
+            </button>
+          </div>
+
+          <!-- Next Button -->
+          <button
+            @click="goToPage(currentPage + 1)"
+            :disabled="currentPage === totalPages"
+            :class="currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : 'hover:bg-secondary-100'"
+            class="px-3 py-2 rounded-md border border-secondary-300 text-sm font-medium text-secondary-700 bg-white"
+          >
+            Weiter →
+          </button>
+        </div>
+        
+        <div class="flex items-center space-x-2">
+          <span class="text-sm text-secondary-600">Pro Seite:</span>
+          <select 
+            :value="settingsStore.productsPerPage"
+            @change="handlePageSizeChange"
+            class="rounded-md border border-secondary-300 text-sm text-secondary-900 bg-white focus:ring-primary-500 focus:border-primary-500"
+          >
+            <option value="10">10</option>
+            <option value="20">20</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+            <option value="250">250</option>
+            <option value="500">500</option>
+            <option value="1000">Alle</option>
+          </select>
+        </div>
+      </div>
     </div>
 
     <!-- Empty State -->
@@ -156,7 +219,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { 
   CheckCircleIcon, 
   ExclamationTriangleIcon, 
@@ -167,17 +230,31 @@ import {
 } from '@heroicons/vue/24/outline'
 import ProductCard from '@/components/product/ProductCard.vue'
 import { useProductsStore } from '@/stores/products'
+import { useSettingsStore } from '@/stores/settings'
 
-// Use Pinia store instead of mock data
+// Use Pinia stores
 const productsStore = useProductsStore()
+const settingsStore = useSettingsStore()
 
 const selectedFilter = ref('all')
 const sortBy = ref('name')
 const searchQuery = ref('')
+const currentPage = ref(1)
 
-// Load products on mount
+// Load products and settings on mount
 onMounted(() => {
-  productsStore.fetchProducts()
+  settingsStore.loadSettings()
+  productsStore.fetchProducts({ size: 1000 })
+})
+
+// Reset to page 1 when filters change
+watch([selectedFilter, searchQuery, sortBy], () => {
+  currentPage.value = 1
+})
+
+// Reset to page 1 when page size changes  
+watch(() => settingsStore.productsPerPage, () => {
+  currentPage.value = 1
 })
 
 // Computed properties from store
@@ -246,6 +323,67 @@ const filteredProducts = computed(() => {
   })
 })
 
+// Pagination computed properties
+const totalPages = computed(() => {
+  const pageSize = settingsStore.productsPerPage
+  if (pageSize >= 1000) return 1 // "Alle" option
+  return Math.ceil(filteredProducts.value.length / pageSize)
+})
+
+const paginatedProducts = computed(() => {
+  const pageSize = settingsStore.productsPerPage
+  if (pageSize >= 1000) return filteredProducts.value // "Alle" option
+  
+  const start = (currentPage.value - 1) * pageSize
+  const end = start + pageSize
+  return filteredProducts.value.slice(start, end)
+})
+
+const startItem = computed(() => {
+  const pageSize = settingsStore.productsPerPage
+  if (pageSize >= 1000 || filteredProducts.value.length === 0) return 1
+  return (currentPage.value - 1) * pageSize + 1
+})
+
+const endItem = computed(() => {
+  const pageSize = settingsStore.productsPerPage
+  if (pageSize >= 1000) return filteredProducts.value.length
+  
+  const end = currentPage.value * pageSize
+  return Math.min(end, filteredProducts.value.length)
+})
+
+const visiblePages = computed(() => {
+  const total = totalPages.value
+  const current = currentPage.value
+  const delta = 2 // Number of pages to show on each side of current
+  
+  if (total <= 7) {
+    // Show all pages if total is small
+    return Array.from({ length: total }, (_, i) => i + 1)
+  }
+  
+  const range = []
+  const rangeWithDots = []
+  
+  for (let i = 1; i <= total; i++) {
+    if (i === 1 || i === total || (i >= current - delta && i <= current + delta)) {
+      range.push(i)
+    }
+  }
+  
+  let prev = 0
+  for (const i of range) {
+    if (prev + 1 < i) {
+      rangeWithDots.push('...')
+    }
+    rangeWithDots.push(i)
+    prev = i
+  }
+  
+  return rangeWithDots.filter(item => typeof item === 'number')
+})
+
 // Helper functions
 function getDaysUntilExpiration(expirationDate: string): number {
   const now = new Date()
@@ -278,5 +416,19 @@ async function markProductAsUsed(productId: number) {
       console.error('Failed to mark product as used:', error)
     }
   }
+}
+
+// Pagination event handlers
+function goToPage(page: number) {
+  if (page >= 1 && page <= totalPages.value) {
+    currentPage.value = page
+  }
+}
+
+function handlePageSizeChange(event: Event) {
+  const target = event.target as HTMLSelectElement
+  const newSize = parseInt(target.value)
+  settingsStore.updateSetting('productsPerPage', newSize)
+  currentPage.value = 1
 }
 </script>

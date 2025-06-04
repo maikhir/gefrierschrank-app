@@ -131,6 +131,25 @@
               <option value="yyyy-mm-dd">YYYY-MM-DD</option>
             </select>
           </div>
+
+          <div class="flex items-center justify-between">
+            <div>
+              <label class="text-sm font-medium text-secondary-900">Produkte pro Seite</label>
+              <p class="text-sm text-secondary-600">Anzahl der Produkte, die gleichzeitig angezeigt werden</p>
+            </div>
+            <select 
+              v-model="settings.productsPerPage"
+              class="rounded-md border border-secondary-300 text-sm text-secondary-900 bg-white focus:ring-primary-500 focus:border-primary-500"
+            >
+              <option value="10">10 Produkte</option>
+              <option value="20">20 Produkte</option>
+              <option value="50">50 Produkte</option>
+              <option value="100">100 Produkte</option>
+              <option value="250">250 Produkte</option>
+              <option value="500">500 Produkte</option>
+              <option value="1000">Alle (1000+)</option>
+            </select>
+          </div>
         </div>
       </div>
 
@@ -260,24 +279,10 @@ import {
   ArrowDownTrayIcon,
   TrashIcon
 } from '@heroicons/vue/24/outline'
+import { useSettingsStore } from '@/stores/settings'
 
-interface Settings {
-  expirationNotifications: boolean
-  notificationDays: number
-  autoDeleteDays: number
-  defaultView: string
-  dateFormat: string
-  debugMode: boolean
-}
-
-const settings = ref<Settings>({
-  expirationNotifications: true,
-  notificationDays: 7,
-  autoDeleteDays: 0,
-  defaultView: 'all',
-  dateFormat: 'dd.mm.yyyy',
-  debugMode: false
-})
+const settingsStore = useSettingsStore()
+const settings = settingsStore.settings
 
 const saving = ref(false)
 const lastUpdated = ref(new Date().toLocaleDateString('de-DE'))
@@ -307,7 +312,7 @@ const debugInfo = ref({
 })
 
 onMounted(() => {
-  loadSettings()
+  settingsStore.loadSettings()
   checkBackendStatus()
   checkAdminStatus()
   updateDebugInfo()
@@ -319,29 +324,14 @@ onMounted(() => {
   })
 })
 
-function loadSettings() {
-  const savedSettings = localStorage.getItem('gefrierschrank-settings')
-  if (savedSettings) {
-    try {
-      const parsed = JSON.parse(savedSettings)
-      Object.assign(settings.value, parsed)
-    } catch (error) {
-      console.error('Failed to load settings:', error)
-    }
-  }
-}
-
-function toggleSetting(key: keyof Settings) {
-  if (typeof settings.value[key] === 'boolean') {
-    (settings.value[key] as boolean) = !(settings.value[key] as boolean)
-  }
+function toggleSetting(key: keyof typeof settings.value) {
+  settingsStore.toggleSetting(key)
 }
 
 async function saveSettings() {
   saving.value = true
   try {
-    localStorage.setItem('gefrierschrank-settings', JSON.stringify(settings.value))
-    await new Promise(resolve => setTimeout(resolve, 500)) // Simulate API call
+    await settingsStore.saveSettings()
     console.log('Settings saved successfully')
   } catch (error) {
     console.error('Failed to save settings:', error)

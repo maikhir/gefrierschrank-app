@@ -10,7 +10,10 @@
       "Bash(npm run db:status:*)",
       "Bash(npm install)",
       "Bash(npm run:*)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(./scripts/db-manager.sh seed:*)",
+      "Bash(./debug_product.sh:*)",
+      "Bash(./scripts/db-manager.sh:*)"
     ],
     "deny": []
   }

@@ -65,6 +65,10 @@ make_request() {
     elif [ "$method" = "POST" ]; then
         curl -s -X POST \
              -H "Content-Type: application/json" \
+             -H "Accept: application/json" \
+             -H "User-Agent: Gefrierschrank-DB-Manager/1.0" \
+             --connect-timeout 10 \
+             --max-time 30 \
              -d "$data" \
              "$url"
     elif [ "$method" = "DELETE" ]; then
@@ -154,13 +158,12 @@ random_date() {
     date -r "$random_timestamp" "+%Y-%m-%d"
 }
 
-# Generate random float
+# Generate random float (simplified)
 random_float() {
     local min="$1"
     local max="$2"
-    local range=$((max - min))
-    local random_part=$((RANDOM % (range * 100)))
-    echo "scale=2; $min + $random_part / 100" | bc
+    local random_int=$((RANDOM % (max - min + 1) + min))
+    echo "$random_int"
 }
 
 # Create sample products
@@ -198,33 +201,39 @@ create_sample_products() {
         # Random selections
         local product_name="${products[$((RANDOM % ${#products[@]}))]}"
         local unit="${units[$((RANDOM % ${#units[@]}))]}"
-        local quantity
-        quantity=$(echo "scale=2; 0.1 + ($RANDOM % 490) / 100" | bc)
+        local quantity=$((RANDOM % 5 + 1))  # 1-5
         
-        # Random dates
-        local frozen_date
-        frozen_date=$(random_date 60 0)
-        local expiration_date
-        expiration_date=$(random_date -30 300)
+        # Fixed dates (simpler)
+        local frozen_date="2025-06-01"
+        local expiration_date="2025-12-01"
         
-        # Get random category and location ID (simplified)
-        local category_id=$((RANDOM % 8 + 1))
-        local location_id=$((RANDOM % 7 + 1))
+        # Extract available IDs from API responses (simplified approach)
+        local available_category_ids
+        local available_location_ids
         
-        local product_data
-        product_data=$(cat <<EOF
-{
-    "name": "$product_name $i",
-    "quantity": $quantity,
-    "unit": "$unit",
-    "frozenDate": "$frozen_date",
-    "expirationDate": "$expiration_date",
-    "categoryId": $category_id,
-    "locationId": $location_id,
-    "notes": null
-}
-EOF
-)
+        if command -v jq &> /dev/null; then
+            # Use jq if available
+            available_category_ids=($(echo "$categories_response" | jq -r '.[].id'))
+            available_location_ids=($(echo "$locations_response" | jq -r '.[].id'))
+        else
+            # Fallback: basic grep extraction
+            available_category_ids=($(echo "$categories_response" | grep -o '"id":[0-9]*' | cut -d':' -f2))
+            available_location_ids=($(echo "$locations_response" | grep -o '"id":[0-9]*' | cut -d':' -f2))
+        fi
+        
+        # Get random IDs from available ones
+        local category_id=${available_category_ids[$((RANDOM % ${#available_category_ids[@]}))]}
+        local location_id=${available_location_ids[$((RANDOM % ${#available_location_ids[@]}))]}
+        
+        # Fallback if arrays are empty
+        if [ -z "$category_id" ]; then
+            category_id=1
+        fi
+        if [ -z "$location_id" ]; then
+            location_id=1
+        fi
+        
+        local product_data="{\"name\":\"$product_name $i\",\"quantity\":$quantity,\"unit\":\"$unit\",\"frozenDate\":\"$frozen_date\",\"expirationDate\":\"$expiration_date\",\"categoryId\":$category_id,\"locationId\":$location_id,\"notes\":null}"
         
         local response
         response=$(make_request "POST" "/products" "$product_data")
@@ -233,6 +242,12 @@ EOF
             log_success "Created product: $product_name $i"
         else
             log_error "Failed to create product: $product_name $i"
+            if [ ${#response} -gt 0 ]; then
+                echo "  Response: $response" | head -c 200
+                echo ""
+            else
+                echo "  No response received"
+            fi
         fi
     done
 }
