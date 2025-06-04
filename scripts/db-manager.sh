@@ -158,6 +158,41 @@ random_date() {
     date -r "$random_timestamp" "+%Y-%m-%d"
 }
 
+# Generate realistic expiration date based on product distribution
+generate_expiration_date() {
+    local product_number="$1"
+    local total_products="$2"
+    local base_date
+    base_date=$(date +%s)
+    
+    # Calculate percentage thresholds
+    local expired_threshold=$((total_products * 10 / 100))        # 10% expired
+    local expiring_threshold=$((total_products * 30 / 100))       # 20% expiring soon (10% + 20%)
+    local fresh_long_threshold=$((total_products * 80 / 100))     # 50% fresh long-term (30% + 50%)
+    
+    if [ "$product_number" -le "$expired_threshold" ]; then
+        # 10% - Expired since 1-7 days ago
+        local days_expired=$((RANDOM % 7 + 1))
+        local timestamp=$((base_date - days_expired * 86400))
+        date -r "$timestamp" "+%Y-%m-%d"
+    elif [ "$product_number" -le "$expiring_threshold" ]; then
+        # 20% - Expiring in 1-7 days
+        local days_until_expiry=$((RANDOM % 7 + 1))
+        local timestamp=$((base_date + days_until_expiry * 86400))
+        date -r "$timestamp" "+%Y-%m-%d"
+    elif [ "$product_number" -le "$fresh_long_threshold" ]; then
+        # 50% - Fresh for 3 months (90 days ± 15 days)
+        local days_until_expiry=$((75 + RANDOM % 30))  # 75-104 days (roughly 3 months)
+        local timestamp=$((base_date + days_until_expiry * 86400))
+        date -r "$timestamp" "+%Y-%m-%d"
+    else
+        # 20% - Random between 8 days and 2 months
+        local days_until_expiry=$((8 + RANDOM % 52))  # 8-59 days
+        local timestamp=$((base_date + days_until_expiry * 86400))
+        date -r "$timestamp" "+%Y-%m-%d"
+    fi
+}
+
 # Generate random float (simplified)
 random_float() {
     local min="$1"
@@ -203,9 +238,11 @@ create_sample_products() {
         local unit="${units[$((RANDOM % ${#units[@]}))]}"
         local quantity=$((RANDOM % 5 + 1))  # 1-5
         
-        # Fixed dates (simpler)
-        local frozen_date="2025-06-01"
-        local expiration_date="2025-12-01"
+        # Generate realistic dates
+        local frozen_date
+        frozen_date=$(random_date 60 0)  # Frozen 0-60 days ago
+        local expiration_date
+        expiration_date=$(generate_expiration_date "$i" "$count")
         
         # Extract available IDs from API responses (simplified approach)
         local available_category_ids
@@ -382,6 +419,13 @@ seed_database() {
     
     echo
     log_success "Database seeded successfully!"
+    echo
+    log_info "Product expiration distribution:"
+    echo "  • 10% expired (1-7 days ago)"
+    echo "  • 20% expiring soon (1-7 days)"
+    echo "  • 50% fresh long-term (~3 months)"
+    echo "  • 20% random (8-60 days)"
+    echo
     show_status
 }
 
