@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find:*)",
+      "Bash(curl:*)",
+      "Bash(./mvnw:*)",
+      "Bash(true)",
+      "Bash(pkill:*)",
+      "Bash(chmod:*)",
+      "Bash(npm run db:status:*)",
+      "Bash(npm install)",
+      "Bash(npm run:*)",
+      "Bash(rm:*)"
+    ],
+    "deny": []
+  }
+}

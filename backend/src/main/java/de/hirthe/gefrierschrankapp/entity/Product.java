@@ -42,16 +42,19 @@ public class Product {
     @NotNull(message = "Quantity is required")
     @DecimalMin(value = "0.01", message = "Quantity must be greater than 0")
     @Column(nullable = false, precision = 10, scale = 2)
+    @Builder.Default
     private BigDecimal quantity = BigDecimal.ONE;
     
     @Size(max = 20, message = "Unit must be less than 20 characters")
     @Column(length = 20)
+    @Builder.Default
     private String unit = "pieces"; // 'kg', 'g', 'pieces', 'liters', 'ml'
     
     // Date management
     @NotNull(message = "Frozen date is required")
     @PastOrPresent(message = "Frozen date cannot be in the future")
     @Column(name = "frozen_date", nullable = false)
+    @Builder.Default
     private LocalDate frozenDate = LocalDate.now();
     
     // Note: No @Future validation here to allow expired products for testing/import

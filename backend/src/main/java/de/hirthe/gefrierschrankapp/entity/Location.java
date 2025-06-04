@@ -38,6 +38,7 @@ public class Location {
     private String freezerSection; // 'upper', 'middle', 'lower', 'drawer1', etc.
     
     @Column(name = "sort_order")
+    @Builder.Default
     private Integer sortOrder = 0; // For custom ordering of locations
     
     @OneToMany(mappedBy = "location", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

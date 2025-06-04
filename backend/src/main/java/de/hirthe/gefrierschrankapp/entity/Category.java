@@ -32,9 +32,11 @@ public class Category {
     
     @Size(max = 7, message = "Color must be a valid hex color code")
     @Column(length = 7)
+    @Builder.Default
     private String color = "#3B82F6"; // Default blue color
     
     @Column(name = "default_storage_days")
+    @Builder.Default
     private Integer defaultStorageDays = 90; // Default 3 months
     
     @Size(max = 500, message = "Description must be less than 500 characters")

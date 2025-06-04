@@ -1,8 +1,8 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <template>
-  <aside class="w-64 bg-white border-r border-secondary-200 h-screen overflow-y-auto">
+  <aside class="w-64 bg-white border-r border-secondary-300 h-screen overflow-y-auto">
     <!-- Categories Section -->
-    <div class="p-4 border-b border-secondary-200">
+    <div class="p-4 border-b border-secondary-300">
       <h2 class="text-sm font-semibold text-secondary-700 uppercase tracking-wide mb-3">
         Kategorien
       </h2>
@@ -49,7 +49,7 @@
     </div>
 
     <!-- Quick Filters -->
-    <div class="p-4 border-t border-secondary-200">
+    <div class="p-4 border-t border-secondary-300">
       <h2 class="text-sm font-semibold text-secondary-700 uppercase tracking-wide mb-3">
         Schnellfilter
       </h2>
@@ -79,7 +79,7 @@
     </div>
 
     <!-- Settings Section -->
-    <div class="mt-auto p-4 border-t border-secondary-200">
+    <div class="mt-auto p-4 border-t border-secondary-300">
       <nav class="space-y-1">
         <RouterLink
           to="/settings"

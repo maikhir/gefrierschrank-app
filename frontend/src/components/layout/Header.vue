@@ -1,6 +1,6 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <template>
-  <header class="bg-white shadow-sm border-b border-secondary-200">
+  <header class="bg-white shadow-sm border-b border-secondary-300">
     <div class="flex items-center justify-between px-4 py-3">
       <!-- Logo & Brand -->
       <div class="flex items-center space-x-4">
@@ -33,7 +33,7 @@
           <input
             type="text"
             placeholder="Produkte suchen..."
-            class="w-full pl-10 pr-4 py-2 border border-secondary-200 rounded-lg text-secondary-900 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 placeholder:text-secondary-600"
+            class="w-full pl-10 pr-4 py-2 border border-secondary-300 rounded-lg text-secondary-900 bg-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 placeholder:text-secondary-600"
             v-model="searchQuery"
             @input="handleSearch"
           />
@@ -69,7 +69,7 @@
           <!-- User Dropdown -->
           <div
             v-if="showUserMenu"
-            class="absolute right-0 top-12 w-56 bg-white rounded-lg shadow-lg border border-secondary-200 py-2 z-50"
+            class="absolute right-0 top-12 w-56 bg-white rounded-lg shadow-lg border border-secondary-300 py-2 z-50"
           >
             <!-- User Info -->
             <div class="px-4 py-3 border-b border-secondary-100">

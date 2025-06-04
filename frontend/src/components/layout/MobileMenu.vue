@@ -1,7 +1,7 @@
 <template>
   <div class="lg:hidden">
     <!-- Mobile menu placeholder for now -->
-    <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-secondary-200 p-4">
+    <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-secondary-300 p-4">
       <div class="flex justify-around">
         <button class="flex flex-col items-center space-y-1 text-secondary-600">
           <HomeIcon class="h-6 w-6" />

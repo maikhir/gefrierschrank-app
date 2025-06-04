@@ -91,7 +91,7 @@
             <input
               type="text"
               placeholder="Produkte suchen..."
-              class="pl-10 pr-4 py-2 border border-secondary-200 rounded-md text-sm text-secondary-900 focus:ring-primary-500 focus:border-primary-500 placeholder:text-secondary-600"
+              class="pl-10 pr-4 py-2 border border-secondary-300 rounded-md text-sm text-secondary-900 bg-white focus:ring-primary-500 focus:border-primary-500 placeholder:text-secondary-600"
               v-model="searchQuery"
             />
           </div>
@@ -99,7 +99,7 @@
           <!-- Sort Dropdown -->
           <select 
             v-model="sortBy" 
-            class="rounded-md border-secondary-200 text-sm focus:ring-primary-500 focus:border-primary-500"
+            class="rounded-md border border-secondary-300 text-sm text-secondary-900 bg-white focus:ring-primary-500 focus:border-primary-500"
           >
             <option value="name">Name</option>
             <option value="expiration">Ablaufdatum</option>

@@ -18,7 +18,7 @@
         <!-- Dropdown Menu -->
         <div
           v-if="showMenu"
-          class="absolute right-0 top-8 w-48 bg-white rounded-md shadow-lg border border-secondary-200 z-10"
+          class="absolute right-0 top-8 w-48 bg-white rounded-md shadow-lg border border-secondary-300 z-10"
           @click.stop
         >
           <button
