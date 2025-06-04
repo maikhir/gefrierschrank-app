@@ -21,9 +21,9 @@
 
       <!-- Navigation (Desktop) -->
       <nav class="hidden lg:flex items-center space-x-8">
-        <a href="/" class="text-secondary-700 hover:text-primary-600 font-medium">Dashboard</a>
-        <a href="/categories" class="text-secondary-700 hover:text-primary-600 font-medium">Kategorien</a>
-        <a href="/locations" class="text-secondary-700 hover:text-primary-600 font-medium">Standorte</a>
+        <RouterLink to="/" class="text-secondary-700 hover:text-primary-600 font-medium" active-class="text-primary-600">Dashboard</RouterLink>
+        <RouterLink to="/categories" class="text-secondary-700 hover:text-primary-600 font-medium" active-class="text-primary-600">Kategorien</RouterLink>
+        <RouterLink to="/locations" class="text-secondary-700 hover:text-primary-600 font-medium" active-class="text-primary-600">Standorte</RouterLink>
       </nav>
       
       <!-- Search (Desktop) -->

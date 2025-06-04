@@ -6,6 +6,7 @@ export interface Category {
   description: string | null
   color: string | null
   defaultStorageDays: number | null
+  icon: string | null
   createdAt: string
   updatedAt: string
 }
@@ -15,6 +16,7 @@ export interface CreateCategoryRequest {
   description?: string
   color?: string
   defaultStorageDays?: number
+  icon?: string
 }
 
 // Get all categories

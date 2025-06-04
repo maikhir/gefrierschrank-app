@@ -84,7 +84,7 @@
           </button>
         </div>
 
-        <!-- Search -->
+        <!-- Search & Controls -->
         <div class="flex items-center space-x-4">
           <div class="relative">
             <MagnifyingGlassIcon class="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-secondary-400" />
@@ -106,6 +106,50 @@
             <option value="category">Kategorie</option>
             <option value="location">Standort</option>
           </select>
+          
+          <!-- Pagination Info (Top) -->
+          <div v-if="totalPages > 1 || filteredProducts.length > 10" class="flex items-center space-x-2 text-sm text-secondary-600">
+            <span>{{ startItem }}-{{ endItem }} von {{ filteredProducts.length }}</span>
+            <div v-if="totalPages > 1" class="flex items-center space-x-1">
+              <button
+                @click="goToPage(currentPage - 1)"
+                :disabled="currentPage === 1"
+                :class="currentPage === 1 ? 'opacity-30 cursor-not-allowed' : 'hover:text-primary-600'"
+                class="p-1 rounded"
+              >
+                ‹
+              </button>
+              <span class="px-2 py-1 text-xs bg-primary-100 text-primary-700 rounded">
+                {{ currentPage }}/{{ totalPages }}
+              </span>
+              <button
+                @click="goToPage(currentPage + 1)"
+                :disabled="currentPage === totalPages"
+                :class="currentPage === totalPages ? 'opacity-30 cursor-not-allowed' : 'hover:text-primary-600'"
+                class="p-1 rounded"
+              >
+                ›
+              </button>
+            </div>
+          </div>
+          
+          <!-- View Toggle -->
+          <div class="flex items-center border border-secondary-300 rounded-md overflow-hidden">
+            <button
+              @click="viewMode = 'cards'"
+              :class="viewMode === 'cards' ? 'bg-primary-50 text-primary-700' : 'text-secondary-600 hover:bg-secondary-50'"
+              class="px-3 py-2 text-sm font-medium transition-colors duration-150"
+            >
+              <Squares2X2Icon class="w-4 h-4" />
+            </button>
+            <button
+              @click="viewMode = 'table'"
+              :class="viewMode === 'table' ? 'bg-primary-50 text-primary-700' : 'text-secondary-600 hover:bg-secondary-50'"
+              class="px-3 py-2 text-sm font-medium transition-colors duration-150 border-l border-secondary-300"
+            >
+              <TableCellsIcon class="w-4 h-4" />
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -126,13 +170,28 @@
       </button>
     </div>
 
-    <!-- Products Grid -->
+    <!-- Products Display -->
     <div v-else>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        <ProductCard
-          v-for="product in paginatedProducts"
-          :key="product.id"
-          :product="product"
+      <!-- Cards View -->
+      <div v-if="viewMode === 'cards'">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <ProductCard
+            v-for="product in paginatedProducts"
+            :key="product.id"
+            :product="product"
+            @edit="editProduct"
+            @delete="deleteProduct"
+            @mark-used="markProductAsUsed"
+          />
+        </div>
+      </div>
+
+      <!-- Table View -->
+      <div v-else>
+        <ProductTable
+          :products="paginatedProducts"
+          @toggle-view="viewMode = 'cards'"
+          @sort="handleSort"
           @edit="editProduct"
           @delete="deleteProduct"
           @mark-used="markProductAsUsed"
@@ -140,7 +199,7 @@
       </div>
 
       <!-- Pagination Controls -->
-      <div v-if="totalPages > 1" class="mt-8 flex items-center justify-between">
+      <div v-if="totalPages > 1 || filteredProducts.length > 10" class="mt-8 flex items-center justify-between">
         <div class="flex items-center space-x-2">
           <span class="text-sm text-secondary-600">
             Zeige {{ startItem }}-{{ endItem }} von {{ filteredProducts.length }} Produkten
@@ -226,9 +285,12 @@ import {
   XCircleIcon,
   ArchiveBoxXMarkIcon,
   PlusIcon,
-  MagnifyingGlassIcon
+  MagnifyingGlassIcon,
+  Squares2X2Icon,
+  TableCellsIcon
 } from '@heroicons/vue/24/outline'
 import ProductCard from '@/components/product/ProductCard.vue'
+import ProductTable from '@/components/product/ProductTable.vue'
 import { useProductsStore } from '@/stores/products'
 import { useSettingsStore } from '@/stores/settings'
 
@@ -240,6 +302,7 @@ const selectedFilter = ref('all')
 const sortBy = ref('name')
 const searchQuery = ref('')
 const currentPage = ref(1)
+const viewMode = ref<'cards' | 'table'>('cards')
 
 // Load products and settings on mount
 onMounted(() => {
@@ -326,8 +389,10 @@ const filteredProducts = computed(() => {
 // Pagination computed properties
 const totalPages = computed(() => {
   const pageSize = settingsStore.productsPerPage
+  const totalProducts = filteredProducts.value.length
+  
   if (pageSize >= 1000) return 1 // "Alle" option
-  return Math.ceil(filteredProducts.value.length / pageSize)
+  return Math.ceil(totalProducts / pageSize)
 })
 
 const paginatedProducts = computed(() => {
@@ -430,5 +495,9 @@ function handlePageSizeChange(event: Event) {
   const newSize = parseInt(target.value)
   settingsStore.updateSetting('productsPerPage', newSize)
   currentPage.value = 1
+}
+
+function handleSort(field: string) {
+  sortBy.value = field
 }
 </script>
