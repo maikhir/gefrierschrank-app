@@ -1,3 +1,4 @@
+<!-- eslint-disable vue/multi-word-component-names -->
 <template>
   <div class="p-6">
     <!-- Header -->
@@ -109,8 +110,24 @@
       </div>
     </div>
 
+
+    <!-- Loading State -->
+    <div v-if="productsStore.loading" class="text-center py-12">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500 mx-auto"></div>
+      <p class="mt-4 text-secondary-600">Lade Produkte...</p>
+    </div>
+
+    <!-- Error State -->
+    <div v-else-if="productsStore.error" class="text-center py-12">
+      <div class="text-red-500 mb-4">❌ Fehler beim Laden der Produkte</div>
+      <p class="text-secondary-600">{{ productsStore.error }}</p>
+      <button @click="productsStore.fetchProducts()" class="mt-4 btn-primary">
+        Erneut versuchen
+      </button>
+    </div>
+
     <!-- Products Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+    <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       <ProductCard
         v-for="product in filteredProducts"
         :key="product.id"

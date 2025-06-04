@@ -1,3 +1,4 @@
+<!-- eslint-disable vue/multi-word-component-names -->
 <template>
   <aside class="w-64 bg-white border-r border-secondary-200 h-screen overflow-y-auto">
     <!-- Categories Section -->
@@ -76,12 +77,27 @@
         </button>
       </nav>
     </div>
+
+    <!-- Settings Section -->
+    <div class="mt-auto p-4 border-t border-secondary-200">
+      <nav class="space-y-1">
+        <RouterLink
+          to="/settings"
+          class="w-full flex items-center px-3 py-2 text-sm rounded-md text-secondary-600 hover:bg-secondary-50 hover:text-secondary-900 transition-colors"
+          active-class="bg-primary-50 text-primary-700"
+        >
+          <CogIcon class="w-4 h-4 mr-3" />
+          Einstellungen
+        </RouterLink>
+      </nav>
+    </div>
   </aside>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { MapPinIcon, ExclamationTriangleIcon, XCircleIcon } from '@heroicons/vue/24/outline'
+import { RouterLink } from 'vue-router'
+import { MapPinIcon, ExclamationTriangleIcon, XCircleIcon, CogIcon } from '@heroicons/vue/24/outline'
 import { useCategoriesStore } from '@/stores/categories'
 import { useLocationsStore } from '@/stores/locations'
 import { useProductsStore } from '@/stores/products'

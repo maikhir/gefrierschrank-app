@@ -69,9 +69,11 @@ export const useProductsStore = defineStore('products', () => {
         first: response.first,
         last: response.last
       }
-    } catch (err: any) {
-      error.value = err.response?.data?.message || err.message || 'Failed to fetch products'
-      console.error('Error fetching products:', err)
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch products'
+      error.value = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || errorMessage
+      console.error('Store: Error fetching products:', err)
+      console.error('Store: Error details:', (err as { response?: unknown })?.response)
     } finally {
       loading.value = false
     }
@@ -87,8 +89,9 @@ export const useProductsStore = defineStore('products', () => {
       pagination.value.totalElements += 1
       
       return newProduct
-    } catch (err: any) {
-      error.value = err.response?.data?.message || err.message || 'Failed to create product'
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to create product'
+      error.value = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || errorMessage
       console.error('Error creating product:', err)
       throw err
     } finally {
@@ -109,8 +112,9 @@ export const useProductsStore = defineStore('products', () => {
       }
       
       return updatedProduct
-    } catch (err: any) {
-      error.value = err.response?.data?.message || err.message || 'Failed to update product'
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to update product'
+      error.value = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || errorMessage
       console.error('Error updating product:', err)
       throw err
     } finally {
@@ -127,8 +131,9 @@ export const useProductsStore = defineStore('products', () => {
       
       products.value = products.value.filter(p => p.id !== id)
       pagination.value.totalElements -= 1
-    } catch (err: any) {
-      error.value = err.response?.data?.message || err.message || 'Failed to delete product'
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to delete product'
+      error.value = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || errorMessage
       console.error('Error deleting product:', err)
       throw err
     } finally {

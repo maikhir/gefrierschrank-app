@@ -41,6 +41,7 @@ public class Location {
     private Integer sortOrder = 0; // For custom ordering of locations
     
     @OneToMany(mappedBy = "location", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private List<Product> products;
     
     @CreationTimestamp

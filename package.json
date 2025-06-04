@@ -9,6 +9,7 @@
     "stop": "npm run stop:ports",
     "stop:ports": "node scripts/stop-dev.js",
     "credentials": "node scripts/show-credentials.js",
+    "seed": "node scripts/seed-database.js",
     "build": "npm run build:frontend",
     "build:frontend": "cd frontend && npm run build",
     "test": "concurrently \"npm run test:backend\" \"npm run test:frontend\"",
@@ -18,7 +19,8 @@
     "install:frontend": "cd frontend && npm install"
   },
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "concurrently": "^8.2.2",
+    "axios": "^1.6.8"
   },
   "keywords": [
     "inventory",

@@ -30,8 +30,9 @@ export const useCategoriesStore = defineStore('categories', () => {
       
       const response = await categoriesApi.getCategories()
       categories.value = response
-    } catch (err: any) {
-      error.value = err.response?.data?.message || err.message || 'Failed to fetch categories'
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch categories'
+      error.value = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || errorMessage
       console.error('Error fetching categories:', err)
     } finally {
       loading.value = false
@@ -47,8 +48,9 @@ export const useCategoriesStore = defineStore('categories', () => {
       categories.value.push(newCategory)
       
       return newCategory
-    } catch (err: any) {
-      error.value = err.response?.data?.message || err.message || 'Failed to create category'
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to create category'
+      error.value = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || errorMessage
       console.error('Error creating category:', err)
       throw err
     } finally {
@@ -69,8 +71,9 @@ export const useCategoriesStore = defineStore('categories', () => {
       }
       
       return updatedCategory
-    } catch (err: any) {
-      error.value = err.response?.data?.message || err.message || 'Failed to update category'
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to update category'
+      error.value = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || errorMessage
       console.error('Error updating category:', err)
       throw err
     } finally {
@@ -85,8 +88,9 @@ export const useCategoriesStore = defineStore('categories', () => {
       
       await categoriesApi.deleteCategory(id)
       categories.value = categories.value.filter(c => c.id !== id)
-    } catch (err: any) {
-      error.value = err.response?.data?.message || err.message || 'Failed to delete category'
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to delete category'
+      error.value = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || errorMessage
       console.error('Error deleting category:', err)
       throw err
     } finally {

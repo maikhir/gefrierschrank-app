@@ -44,6 +44,15 @@ npm run test                 # Run tests
 npm run build               # Production build
 ```
 
+### Database Seeding Scripts
+```bash
+# Seed database with sample data
+./scripts/seed-database.sh
+
+# Clear database (restart backend)
+./scripts/clear-database.sh
+```
+
 ### Root Level Commands
 ```bash
 npm run dev                  # Start both services

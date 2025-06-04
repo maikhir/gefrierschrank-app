@@ -1,3 +1,4 @@
+<!-- eslint-disable vue/multi-word-component-names -->
 <template>
   <header class="bg-white shadow-sm border-b border-secondary-200">
     <div class="flex items-center justify-between px-4 py-3">
@@ -56,10 +57,64 @@
         </button>
         
         <!-- User Menu -->
-        <div class="relative">
-          <button class="p-2 rounded-full bg-primary-100 text-primary-600">
+        <div class="relative" ref="userMenuRef">
+          <button 
+            @click="toggleUserMenu"
+            class="p-2 rounded-full bg-primary-100 text-primary-600 hover:bg-primary-200 transition-colors"
+            :class="{ 'bg-primary-200': showUserMenu }"
+          >
             <UserIcon class="h-6 w-6" />
           </button>
+          
+          <!-- User Dropdown -->
+          <div
+            v-if="showUserMenu"
+            class="absolute right-0 top-12 w-56 bg-white rounded-lg shadow-lg border border-secondary-200 py-2 z-50"
+          >
+            <!-- User Info -->
+            <div class="px-4 py-3 border-b border-secondary-100">
+              <div class="flex items-center space-x-3">
+                <div class="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center">
+                  <UserIcon class="w-5 h-5 text-primary-600" />
+                </div>
+                <div>
+                  <div class="font-medium text-secondary-900">Max Mustermann</div>
+                  <div class="text-sm text-secondary-500">Administrator</div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Menu Items -->
+            <nav class="py-2">
+              <RouterLink
+                to="/settings"
+                @click="closeUserMenu"
+                class="flex items-center px-4 py-2 text-sm text-secondary-700 hover:bg-secondary-50 hover:text-secondary-900 transition-colors"
+              >
+                <CogIcon class="w-4 h-4 mr-3" />
+                Einstellungen
+              </RouterLink>
+              
+              <RouterLink
+                to="/profile"
+                @click="closeUserMenu"
+                class="flex items-center px-4 py-2 text-sm text-secondary-700 hover:bg-secondary-50 hover:text-secondary-900 transition-colors"
+              >
+                <UserCircleIcon class="w-4 h-4 mr-3" />
+                Profil
+              </RouterLink>
+              
+              <div class="border-t border-secondary-100 my-2"></div>
+              
+              <button
+                @click="handleLogout"
+                class="w-full flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+              >
+                <ArrowRightOnRectangleIcon class="w-4 h-4 mr-3" />
+                Abmelden
+              </button>
+            </nav>
+          </div>
         </div>
       </div>
     </div>
@@ -67,15 +122,21 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
+import { RouterLink } from 'vue-router'
 import { 
   Bars3Icon, 
   MagnifyingGlassIcon, 
   PlusIcon, 
-  UserIcon 
+  UserIcon,
+  CogIcon,
+  UserCircleIcon,
+  ArrowRightOnRectangleIcon
 } from '@heroicons/vue/24/outline'
 
 const searchQuery = ref('')
+const showUserMenu = ref(false)
+const userMenuRef = ref<HTMLElement>()
 
 const emit = defineEmits(['toggle-sidebar', 'show-add-product', 'search'])
 
@@ -90,4 +151,33 @@ const showAddProduct = () => {
 const handleSearch = () => {
   emit('search', searchQuery.value)
 }
+
+const toggleUserMenu = () => {
+  showUserMenu.value = !showUserMenu.value
+}
+
+const closeUserMenu = () => {
+  showUserMenu.value = false
+}
+
+const handleLogout = () => {
+  // TODO: Implement logout logic
+  console.log('Logout clicked')
+  closeUserMenu()
+}
+
+// Close dropdown when clicking outside
+const handleClickOutside = (event: MouseEvent) => {
+  if (userMenuRef.value && !userMenuRef.value.contains(event.target as Node)) {
+    showUserMenu.value = false
+  }
+}
+
+onMounted(() => {
+  document.addEventListener('click', handleClickOutside)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside)
+})
 </script>

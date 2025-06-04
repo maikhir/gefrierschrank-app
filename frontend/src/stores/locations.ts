@@ -46,8 +46,9 @@ export const useLocationsStore = defineStore('locations', () => {
         }
         return a.name.localeCompare(b.name)
       })
-    } catch (err: any) {
-      error.value = err.response?.data?.message || err.message || 'Failed to fetch locations'
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch locations'
+      error.value = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || errorMessage
       console.error('Error fetching locations:', err)
     } finally {
       loading.value = false
@@ -71,8 +72,9 @@ export const useLocationsStore = defineStore('locations', () => {
       })
       
       return newLocation
-    } catch (err: any) {
-      error.value = err.response?.data?.message || err.message || 'Failed to create location'
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to create location'
+      error.value = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || errorMessage
       console.error('Error creating location:', err)
       throw err
     } finally {
@@ -93,8 +95,9 @@ export const useLocationsStore = defineStore('locations', () => {
       }
       
       return updatedLocation
-    } catch (err: any) {
-      error.value = err.response?.data?.message || err.message || 'Failed to update location'
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to update location'
+      error.value = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || errorMessage
       console.error('Error updating location:', err)
       throw err
     } finally {
@@ -109,8 +112,9 @@ export const useLocationsStore = defineStore('locations', () => {
       
       await locationsApi.deleteLocation(id)
       locations.value = locations.value.filter(l => l.id !== id)
-    } catch (err: any) {
-      error.value = err.response?.data?.message || err.message || 'Failed to delete location'
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to delete location'
+      error.value = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || errorMessage
       console.error('Error deleting location:', err)
       throw err
     } finally {

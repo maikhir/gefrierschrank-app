@@ -27,6 +27,10 @@ export interface Product {
   }
   createdAt: string
   updatedAt: string
+  // Additional computed fields from backend
+  daysUntilExpiration?: number
+  expired?: boolean
+  expiringSoon?: boolean
 }
 
 export interface CreateProductRequest {

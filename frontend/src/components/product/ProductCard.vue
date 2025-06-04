@@ -123,7 +123,7 @@ import {
 interface Product {
   id: number
   name: string
-  category: { id: number; name: string; color?: string }
+  category: { id: number; name: string; color: string | null }
   location: { id: number; name: string }
   quantity: number
   unit: string
