@@ -68,9 +68,9 @@ jobs:
         awk -v section="$SECTION" '
         /^## / { current_section = $0; in_target = 0 }
         current_section ~ section { in_target = 1 }
-        in_target && /^\| .* \| ✅/ { 
+        in_target && /^\| .* \| (✅|🚀)/ { 
           gsub(/^\| /, "- ✅ ")
-          gsub(/ \| ✅.*/, "")
+          gsub(/ \| (✅|🚀).*/, "")
           print $0
         }
         ' FEATURES.md >> release_notes.md

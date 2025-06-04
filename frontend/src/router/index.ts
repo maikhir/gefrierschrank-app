@@ -1,5 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import Dashboard from '../views/Dashboard.vue'
+import CategoriesView from '../views/CategoriesView.vue'
+import LocationsView from '../views/LocationsView.vue'
 import SettingsView from '../views/SettingsView.vue'
 
 const router = createRouter({
@@ -9,6 +11,22 @@ const router = createRouter({
       path: '/',
       name: 'dashboard',
       component: Dashboard,
+    },
+    {
+      path: '/categories',
+      name: 'categories',
+      component: CategoriesView,
+      meta: {
+        title: 'Kategorien'
+      }
+    },
+    {
+      path: '/locations',
+      name: 'locations',
+      component: LocationsView,
+      meta: {
+        title: 'Standorte'
+      }
     },
     {
       path: '/settings',

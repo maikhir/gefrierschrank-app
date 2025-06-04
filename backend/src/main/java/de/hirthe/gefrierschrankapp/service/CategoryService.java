@@ -36,14 +36,6 @@ public class CategoryService {
         return categoryRepository.findById(id);
     }
     
-    /**
-     * Get category by name (case-insensitive)
-     */
-    @Transactional(readOnly = true)
-    public Optional<Category> getCategoryByName(String name) {
-        log.debug("Fetching category with name: {}", name);
-        return categoryRepository.findByNameIgnoreCase(name);
-    }
     
     /**
      * Create new category
@@ -63,6 +55,10 @@ public class CategoryService {
         
         if (category.getDefaultStorageDays() == null) {
             category.setDefaultStorageDays(90); // Default 3 months
+        }
+        
+        if (category.getIcon() == null || category.getIcon().isEmpty()) {
+            category.setIcon("ArchiveBoxIcon"); // Default icon
         }
         
         Category savedCategory = categoryRepository.save(category);
@@ -90,6 +86,7 @@ public class CategoryService {
         existingCategory.setDescription(categoryUpdate.getDescription());
         existingCategory.setColor(categoryUpdate.getColor());
         existingCategory.setDefaultStorageDays(categoryUpdate.getDefaultStorageDays());
+        existingCategory.setIcon(categoryUpdate.getIcon());
         
         Category updatedCategory = categoryRepository.save(existingCategory);
         log.info("Successfully updated category with id: {}", updatedCategory.getId());
@@ -124,62 +121,76 @@ public class CategoryService {
         return categoryRepository.findAllWithProducts();
     }
     
+    
     /**
-     * Check if category exists
+     * Reinitialize default categories (create missing ones)
      */
-    @Transactional(readOnly = true)
-    public boolean categoryExists(Long id) {
-        return categoryRepository.existsById(id);
+    public void reinitializeDefaultCategories() {
+        log.info("Reinitializing default categories");
+        createDefaultCategories();
     }
     
     /**
-     * Initialize default categories if none exist
+     * Create default categories (skips existing ones)
      */
-    public void initializeDefaultCategories() {
-        log.info("Initializing default categories");
+    private void createDefaultCategories() {
+        List<Category> defaultCategories = List.of(
+            Category.builder()
+                .name("Fleisch")
+                .description("Fleisch und Geflügel")
+                .color("#EF4444")
+                .defaultStorageDays(180)
+                .icon("ArchiveBoxIcon")
+                .build(),
+            Category.builder()
+                .name("Gemüse")
+                .description("Gefrorenes Gemüse")
+                .color("#22C55E")
+                .defaultStorageDays(365)
+                .icon("ArchiveBoxIcon")
+                .build(),
+            Category.builder()
+                .name("Fertiggerichte")
+                .description("Fertige Mahlzeiten")
+                .color("#F59E0B")
+                .defaultStorageDays(90)
+                .icon("ArchiveBoxIcon")
+                .build(),
+            Category.builder()
+                .name("Brot & Backwaren")
+                .description("Brot, Brötchen und Backwaren")
+                .color("#8B5CF6")
+                .defaultStorageDays(90)
+                .icon("ArchiveBoxIcon")
+                .build(),
+            Category.builder()
+                .name("Eis & Desserts")
+                .description("Eis und gefrorene Nachspeisen")
+                .color("#EC4899")
+                .defaultStorageDays(365)
+                .icon("ArchiveBoxIcon")
+                .build(),
+            Category.builder()
+                .name("Reste")
+                .description("Übriggebliebene Mahlzeiten")
+                .color("#6B7280")
+                .defaultStorageDays(30)
+                .icon("ArchiveBoxIcon")
+                .build()
+        );
         
-        if (categoryRepository.count() == 0) {
-            List<Category> defaultCategories = List.of(
-                Category.builder()
-                    .name("Fleisch")
-                    .description("Fleisch und Geflügel")
-                    .color("#EF4444")
-                    .defaultStorageDays(180)
-                    .build(),
-                Category.builder()
-                    .name("Gemüse")
-                    .description("Gefrorenes Gemüse")
-                    .color("#22C55E")
-                    .defaultStorageDays(365)
-                    .build(),
-                Category.builder()
-                    .name("Fertiggerichte")
-                    .description("Fertige Mahlzeiten")
-                    .color("#F59E0B")
-                    .defaultStorageDays(90)
-                    .build(),
-                Category.builder()
-                    .name("Brot & Backwaren")
-                    .description("Brot, Brötchen und Backwaren")
-                    .color("#8B5CF6")
-                    .defaultStorageDays(90)
-                    .build(),
-                Category.builder()
-                    .name("Eis & Desserts")
-                    .description("Eis und gefrorene Nachspeisen")
-                    .color("#EC4899")
-                    .defaultStorageDays(365)
-                    .build(),
-                Category.builder()
-                    .name("Reste")
-                    .description("Übriggebliebene Mahlzeiten")
-                    .color("#6B7280")
-                    .defaultStorageDays(30)
-                    .build()
-            );
-            
-            categoryRepository.saveAll(defaultCategories);
-            log.info("Created {} default categories", defaultCategories.size());
+        int createdCount = 0;
+        for (Category defaultCategory : defaultCategories) {
+            // Check if category with this name already exists
+            if (!categoryRepository.existsByNameIgnoreCase(defaultCategory.getName())) {
+                categoryRepository.save(defaultCategory);
+                createdCount++;
+                log.debug("Created default category: {}", defaultCategory.getName());
+            } else {
+                log.debug("Category already exists, skipping: {}", defaultCategory.getName());
+            }
         }
+        
+        log.info("Created {} new default categories", createdCount);
     }
 }

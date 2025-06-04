@@ -42,6 +42,9 @@ public class Category {
     @Size(max = 500, message = "Description must be less than 500 characters")
     private String description;
     
+    @Size(max = 100, message = "Icon name must be less than 100 characters")
+    private String icon;
+    
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @com.fasterxml.jackson.annotation.JsonIgnore
     private List<Product> products;
