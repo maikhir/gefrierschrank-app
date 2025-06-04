@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>de.hirthe</groupId>
 	<artifactId>gefrierschrank-app</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0.0-rc.1</version>
 	<name>gefrierschrank-app</name>
 	<description>Demo project for Spring Boot</description>
 	<url/>

@@ -490,7 +490,7 @@
           Über die App
         </h3>
         <div class="space-y-2 text-sm text-secondary-600">
-          <p><strong>Version:</strong> 1.0.0-beta.1</p>
+          <p><strong>Version:</strong> 1.0.0-rc.1</p>
           <p><strong>Letzte Aktualisierung:</strong> {{ lastUpdated }}</p>
           <p><strong>Entwickelt von:</strong> Maik Hirthe</p>
         </div>
