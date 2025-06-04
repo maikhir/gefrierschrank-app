@@ -1047,7 +1047,7 @@ function handleDebugToggle() {
   console.log('Debug toggle clicked, isAdmin:', isAdmin.value, 'debugMode:', settings.debugMode)
   
   if (isAdmin.value) {
-    toggleSetting('debugMode')
+    settingsStore.toggleSetting('debugMode')
     // Update debug info when debug mode changes
     if (settings.debugMode) {
       updateDebugInfo()

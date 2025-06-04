@@ -14,7 +14,26 @@
       "Bash(./scripts/db-manager.sh seed:*)",
       "Bash(./debug_product.sh:*)",
       "Bash(./scripts/db-manager.sh:*)",
-      "Bash(mvn:*)"
+      "Bash(mvn:*)",
+      "Bash(grep:*)",
+      "Bash(git restore:*)",
+      "Bash(git checkout:*)",
+      "Bash(git add:*)",
+      "Bash(git push:*)",
+      "Bash(gh pr create:*)",
+      "Bash(git tag:*)",
+      "Bash(gh pr checks:*)",
+      "Bash(gh run view:*)",
+      "Bash(cp:*)",
+      "Bash(gh run list:*)",
+      "Bash(gh release list:*)",
+      "Bash(gh release view:*)",
+      "Bash(gh pr view:*)",
+      "Bash(gh pr merge:*)",
+      "Bash(git fetch:*)",
+      "Bash(git merge:*)",
+      "Bash(git stash:*)",
+      "Bash(git status:*)"
     ],
     "deny": []
   }

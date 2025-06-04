@@ -5,6 +5,9 @@
     <div class="mb-8">
       <h2 class="text-2xl font-bold text-secondary-900 mb-2">
         Gefrierschrank Übersicht
+        <span v-if="activeFilterName" class="text-lg font-normal text-secondary-600">
+          • {{ activeFilterName }}
+        </span>
       </h2>
       <p class="text-secondary-600">
         {{ totalProducts }} Produkte insgesamt • {{ expiringProducts.length }} laufen bald ab
@@ -59,29 +62,47 @@
     <!-- Filter Bar -->
     <div class="card p-4 mb-6">
       <div class="flex flex-wrap gap-4 items-center justify-between">
-        <!-- Quick Filter Buttons -->
-        <div class="flex items-center space-x-2">
-          <button
-            @click="selectedFilter = 'all'"
-            :class="selectedFilter === 'all' ? 'btn-primary' : 'btn-secondary'"
-            class="px-4 py-2 text-sm rounded-md font-medium"
-          >
-            Alle
-          </button>
-          <button
-            @click="selectedFilter = 'expiring'"
-            :class="selectedFilter === 'expiring' ? 'btn-primary' : 'btn-secondary'"
-            class="px-4 py-2 text-sm rounded-md font-medium"
-          >
-            Läuft ab
-          </button>
-          <button
-            @click="selectedFilter = 'expired'"
-            :class="selectedFilter === 'expired' ? 'btn-primary' : 'btn-secondary'" 
-            class="px-4 py-2 text-sm rounded-md font-medium"
-          >
-            Abgelaufen
-          </button>
+        <!-- Quick Filter Buttons with Count -->
+        <div class="flex items-center space-x-4">
+          <div class="flex items-center space-x-2">
+            <button
+              @click="selectedFilter = 'all'"
+              :class="selectedFilter === 'all' ? 'btn-primary' : 'btn-secondary'"
+              class="px-4 py-2 text-sm rounded-md font-medium"
+            >
+              Alle
+            </button>
+            <button
+              @click="selectedFilter = 'expiring'"
+              :class="selectedFilter === 'expiring' ? 'btn-primary' : 'btn-secondary'"
+              class="px-4 py-2 text-sm rounded-md font-medium"
+            >
+              Läuft ab
+            </button>
+            <button
+              @click="selectedFilter = 'expired'"
+              :class="selectedFilter === 'expired' ? 'btn-primary' : 'btn-secondary'" 
+              class="px-4 py-2 text-sm rounded-md font-medium"
+            >
+              Abgelaufen
+            </button>
+          </div>
+          
+          <!-- Filter Result Count -->
+          <div class="text-sm text-secondary-600 bg-secondary-50 px-3 py-2 rounded-md border">
+            {{ filteredProducts.length }} 
+            {{ filteredProducts.length === 1 ? 'Produkt' : 'Produkte' }}
+            <span v-if="searchQuery.trim() || selectedFilter !== 'all' || hasSidebarFilters" class="text-secondary-500">
+              (gefiltert)
+            </span>
+          </div>
+          
+          <!-- Active Filters Badge -->
+          <div v-if="activeFilterCount > 0" class="flex items-center space-x-2">
+            <div class="text-xs text-primary-600 bg-primary-50 px-2 py-1 rounded-full border border-primary-200 font-medium">
+              {{ activeFilterCount }} Filter aktiv
+            </div>
+          </div>
         </div>
 
         <!-- Search & Controls -->
@@ -293,10 +314,21 @@ import ProductCard from '@/components/product/ProductCard.vue'
 import ProductTable from '@/components/product/ProductTable.vue'
 import { useProductsStore } from '@/stores/products'
 import { useSettingsStore } from '@/stores/settings'
+import { useCategoriesStore } from '@/stores/categories'
+import { useLocationsStore } from '@/stores/locations'
+
+// Props from layout for sidebar filters
+const props = defineProps<{
+  sidebarCategoryFilter?: number | null
+  sidebarLocationFilter?: number | null
+  sidebarStatusFilter?: string | null
+}>()
 
 // Use Pinia stores
 const productsStore = useProductsStore()
 const settingsStore = useSettingsStore()
+const categoriesStore = useCategoriesStore()
+const locationsStore = useLocationsStore()
 
 const selectedFilter = ref('all')
 const sortBy = ref('name')
@@ -308,6 +340,8 @@ const viewMode = ref<'cards' | 'table'>('cards')
 onMounted(() => {
   settingsStore.loadSettings()
   productsStore.fetchProducts({ size: 1000 })
+  categoriesStore.fetchCategories()
+  locationsStore.fetchLocations()
 })
 
 // Reset to page 1 when filters change
@@ -318,6 +352,24 @@ watch([selectedFilter, searchQuery, sortBy], () => {
 // Reset to page 1 when page size changes  
 watch(() => settingsStore.productsPerPage, () => {
   currentPage.value = 1
+})
+
+// Sync top bar filters with sidebar filters
+watch(() => props.sidebarStatusFilter, (newStatus) => {
+  if (newStatus) {
+    selectedFilter.value = newStatus
+  } else {
+    selectedFilter.value = 'all'
+  }
+  currentPage.value = 1
+})
+
+// Reset page when sidebar filters change
+watch([() => props.sidebarCategoryFilter, () => props.sidebarLocationFilter], () => {
+  currentPage.value = 1
+  if (!props.sidebarStatusFilter) {
+    selectedFilter.value = 'all'
+  }
 })
 
 // Computed properties from store
@@ -333,8 +385,76 @@ const freshProducts = computed(() =>
   })
 )
 
+// Active filter name for header display
+const activeFilterName = computed(() => {
+  const filters = []
+  
+  if (props.sidebarCategoryFilter) {
+    const category = categoriesStore.categories.find(c => c.id === props.sidebarCategoryFilter)
+    if (category) filters.push(category.name)
+  }
+  
+  if (props.sidebarLocationFilter) {
+    const location = locationsStore.locations.find(l => l.id === props.sidebarLocationFilter)
+    if (location) filters.push(location.name)
+  }
+  
+  if (props.sidebarStatusFilter) {
+    switch (props.sidebarStatusFilter) {
+      case 'expiring': filters.push('Läuft bald ab'); break
+      case 'expired': filters.push('Abgelaufen'); break
+    }
+  }
+  
+  if (filters.length === 0) return null
+  if (filters.length === 1) return filters[0]
+  return filters.join(' • ')
+})
+
+// Check if any sidebar filters are active
+const hasSidebarFilters = computed(() => {
+  return !!(props.sidebarCategoryFilter || props.sidebarLocationFilter || props.sidebarStatusFilter)
+})
+
+// Count active filters
+const activeFilterCount = computed(() => {
+  let count = 0
+  if (props.sidebarCategoryFilter) count++
+  if (props.sidebarLocationFilter) count++
+  if (props.sidebarStatusFilter) count++
+  if (searchQuery.value.trim()) count++
+  return count
+})
+
 const filteredProducts = computed(() => {
   let filtered = productsStore.products
+
+  // Apply sidebar category filter
+  if (props.sidebarCategoryFilter) {
+    filtered = filtered.filter(product => product.category.id === props.sidebarCategoryFilter)
+  }
+
+  // Apply sidebar location filter
+  if (props.sidebarLocationFilter) {
+    filtered = filtered.filter(product => product.location.id === props.sidebarLocationFilter)
+  }
+
+  // Apply sidebar status filter
+  if (props.sidebarStatusFilter) {
+    if (props.sidebarStatusFilter === 'expiring') {
+      filtered = filtered.filter(p => {
+        if (!p.expirationDate) return false
+        const daysUntil = getDaysUntilExpiration(p.expirationDate)
+        return daysUntil <= 7 && daysUntil > 0
+      })
+    } else if (props.sidebarStatusFilter === 'expired') {
+      filtered = filtered.filter(p => {
+        if (!p.expirationDate) return false
+        const daysUntil = getDaysUntilExpiration(p.expirationDate)
+        return daysUntil <= 0
+      })
+    }
+  }
 
   // Apply search filter
   if (searchQuery.value.trim()) {
@@ -346,25 +466,27 @@ const filteredProducts = computed(() => {
     )
   }
 
-  // Apply status filter
-  if (selectedFilter.value === 'fresh') {
-    filtered = filtered.filter(p => {
-      if (!p.expirationDate) return true
-      const daysUntil = getDaysUntilExpiration(p.expirationDate)
-      return daysUntil > 7
-    })
-  } else if (selectedFilter.value === 'expiring') {
-    filtered = filtered.filter(p => {
-      if (!p.expirationDate) return false
-      const daysUntil = getDaysUntilExpiration(p.expirationDate)
-      return daysUntil <= 7 && daysUntil > 0
-    })
-  } else if (selectedFilter.value === 'expired') {
-    filtered = filtered.filter(p => {
-      if (!p.expirationDate) return false
-      const daysUntil = getDaysUntilExpiration(p.expirationDate)
-      return daysUntil <= 0
-    })
+  // Apply top bar status filter (only if no sidebar filter is active)
+  if (!props.sidebarStatusFilter && selectedFilter.value !== 'all') {
+    if (selectedFilter.value === 'fresh') {
+      filtered = filtered.filter(p => {
+        if (!p.expirationDate) return true
+        const daysUntil = getDaysUntilExpiration(p.expirationDate)
+        return daysUntil > 7
+      })
+    } else if (selectedFilter.value === 'expiring') {
+      filtered = filtered.filter(p => {
+        if (!p.expirationDate) return false
+        const daysUntil = getDaysUntilExpiration(p.expirationDate)
+        return daysUntil <= 7 && daysUntil > 0
+      })
+    } else if (selectedFilter.value === 'expired') {
+      filtered = filtered.filter(p => {
+        if (!p.expirationDate) return false
+        const daysUntil = getDaysUntilExpiration(p.expirationDate)
+        return daysUntil <= 0
+      })
+    }
   }
 
   // Apply sorting
