@@ -4,7 +4,7 @@
 
 **Status:** ✅ Accepted  
 **Date:** 2025-05-28  
-**Related Features:** All features in [FEATURES.md](./FEATURES.md)
+**Related Features:** All features in [FEATURES.md](FEATURES.md)
 
 ### Context
 We need to decide on the overall system architecture for the Gefrierschrank App.
@@ -37,7 +37,7 @@ We choose a **Monolithic Architecture** over Microservices.
 
 **Status:** ✅ Accepted  
 **Date:** 2025-05-28  
-**Related Features:** [Responsive Design](./FEATURES.md#responsive-design-desktoptabletmobile-ui)
+**Related Features:** [Responsive Design](FEATURES.md#responsive-design-desktoptabletmobile-ui)
 
 ### Context
 We need to choose a frontend framework for the responsive web application.
@@ -126,7 +126,7 @@ Migration: Flyway/Liquibase for schema management
 
 **Status:** ✅ Accepted  
 **Date:** 2025-05-28  
-**Related Features:** [Multi-User Support](./FEATURES.md#multi-user-support-mehrere-benutzer-optional)
+**Related Features:** [Multi-User Support](FEATURES.md#multi-user-support-mehrere-benutzer-optional)
 
 ### Context
 We need to implement secure authentication and authorization for the application.
@@ -289,7 +289,7 @@ stores/
 
 **Status:** ✅ Accepted  
 **Date:** 2025-05-28  
-**Related Features:** [Responsive Design](./FEATURES.md#responsive-design-desktoptabletmobile-ui)
+**Related Features:** [Responsive Design](FEATURES.md#responsive-design-desktoptabletmobile-ui)
 
 ### Context
 We need to choose a styling approach and UI component strategy.
@@ -494,24 +494,24 @@ k3s Cluster:
 
 | Feature | Related ADRs | Implementation Notes |
 |---------|-------------|---------------------|
-| [Basis-Inventar Management](./FEATURES.md#basis-inventar-management) | ADR-001, ADR-003, ADR-005 | Monolith + PostgreSQL + REST API |
-| [Kategorisierung](./FEATURES.md#kategorisierung--organisation) | ADR-003, ADR-005 | Database categories table + REST endpoints |
-| [Datums-Management](./FEATURES.md#datums-management) | ADR-003 | PostgreSQL date handling + business logic |
-| [Responsive Design](./FEATURES.md#responsive-design-desktoptabletmobile-ui) | ADR-002, ADR-007 | Vue.js + Tailwind CSS responsive utilities |
+| [Basis-Inventar Management](FEATURES.md#basis-inventar-management) | ADR-001, ADR-003, ADR-005 | Monolith + PostgreSQL + REST API |
+| [Kategorisierung](FEATURES.md#kategorisierung--organisation) | ADR-003, ADR-005 | Database categories table + REST endpoints |
+| [Datums-Management](FEATURES.md#datums-management) | ADR-003 | PostgreSQL date handling + business logic |
+| [Responsive Design](FEATURES.md#responsive-design-desktoptabletmobile-ui) | ADR-002, ADR-007 | Vue.js + Tailwind CSS responsive utilities |
 
 ### Advanced Features (v1.1+) → Architecture Decisions
 
 | Feature | Related ADRs | Implementation Notes |
 |---------|-------------|---------------------|
-| [Benachrichtigungen](./FEATURES.md#benachrichtigungen--warnungen) | ADR-001, ADR-004, ADR-005 | Backend scheduling + Web Push API |
-| [Daten-Management](./FEATURES.md#daten-management) | ADR-003, ADR-005 | PostgreSQL backup + REST export/import |
+| [Benachrichtigungen](FEATURES.md#benachrichtigungen--warnungen) | ADR-001, ADR-004, ADR-005 | Backend scheduling + Web Push API |
+| [Daten-Management](FEATURES.md#daten-management) | ADR-003, ADR-005 | PostgreSQL backup + REST export/import |
 
 ### Optional Features (v2.0+) → Architecture Decisions
 
 | Feature | Related ADRs | Implementation Notes |
 |---------|-------------|---------------------|
-| [Multi-User Support](./FEATURES.md#multi-user-support-mehrere-benutzer-optional) | ADR-004 | JWT authentication + RBAC |
-| [Produkt-Fotos](./FEATURES.md#produkt-fotos-bilder-hinzufügen-optional) | ADR-003, ADR-010 | PostgreSQL blob storage + k3s persistent volumes |
+| [Multi-User Support](FEATURES.md#multi-user-support-mehrere-benutzer-optional) | ADR-004 | JWT authentication + RBAC |
+| [Produkt-Fotos](FEATURES.md#produkt-fotos-bilder-hinzufügen-optional) | ADR-003, ADR-010 | PostgreSQL blob storage + k3s persistent volumes |
 
 ---
 

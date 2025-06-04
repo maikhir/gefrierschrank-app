@@ -467,6 +467,7 @@ Admin:
 ## Deployment Architecture
 
 ### Docker Configuration
+
 ```dockerfile
 # Backend Dockerfile
 FROM eclipse-temurin:23-jre-alpine
@@ -479,7 +480,7 @@ FROM node:18-alpine AS build
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci
-COPY . .
+COPY .. .
 RUN npm run build
 
 FROM nginx:alpine
