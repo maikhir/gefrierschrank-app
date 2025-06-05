@@ -145,6 +145,30 @@ export const useProductsStore = defineStore('products', () => {
     return products.value.find(p => p.id === id)
   }
 
+  const getProduct = async (id: number): Promise<Product> => {
+    // First try to find in local store
+    const localProduct = getProductById(id)
+    if (localProduct) {
+      return localProduct
+    }
+    
+    // If not found locally, fetch from API
+    try {
+      const product = await productsApi.getProduct(id)
+      // Update local store if product is fetched successfully
+      const existingIndex = products.value.findIndex(p => p.id === id)
+      if (existingIndex !== -1) {
+        products.value[existingIndex] = product
+      } else {
+        products.value.push(product)
+      }
+      return product
+    } catch (err) {
+      console.error('Error fetching product:', err)
+      throw err
+    }
+  }
+
   const clearError = () => {
     error.value = null
   }
@@ -168,6 +192,7 @@ export const useProductsStore = defineStore('products', () => {
     updateProduct,
     deleteProduct,
     getProductById,
+    getProduct,
     clearError
   }
 })

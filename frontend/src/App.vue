@@ -1,6 +1,8 @@
 <template>
   <div id="app" class="min-h-screen bg-secondary-50">
-    <Header />
+    <Header 
+      @show-add-product="handleShowAddProduct"
+    />
     <div class="flex">
       <Sidebar 
         v-if="!isMobile" 
@@ -11,6 +13,7 @@
       />
       <main class="flex-1">
         <RouterView 
+          ref="routerViewRef"
           :sidebar-category-filter="sidebarCategoryFilter"
           :sidebar-location-filter="sidebarLocationFilter"
           :sidebar-status-filter="sidebarStatusFilter"
@@ -30,6 +33,9 @@ import MobileMenu from './components/layout/MobileMenu.vue'
 
 // Responsive state
 const isMobile = ref(false)
+
+// Router view reference  
+const routerViewRef = ref()
 
 // Sidebar filter state
 const sidebarCategoryFilter = ref<number | null>(null)
@@ -72,6 +78,14 @@ const handleClearFilters = () => {
   sidebarCategoryFilter.value = null
   sidebarLocationFilter.value = null
   sidebarStatusFilter.value = null
+}
+
+// Handle show add product from header
+const handleShowAddProduct = () => {
+  // Check if current route is Dashboard and call openAddProductModal
+  if (routerViewRef.value && typeof routerViewRef.value.openAddProductModal === 'function') {
+    routerViewRef.value.openAddProductModal()
+  }
 }
 </script>
 

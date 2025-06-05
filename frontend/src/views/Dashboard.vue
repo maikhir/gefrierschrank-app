@@ -203,6 +203,7 @@
             @edit="editProduct"
             @delete="deleteProduct"
             @mark-used="markProductAsUsed"
+            @quantity-change="handleQuickQuantityChange"
           />
         </div>
       </div>
@@ -216,6 +217,7 @@
           @edit="editProduct"
           @delete="deleteProduct"
           @mark-used="markProductAsUsed"
+          @quantity-change="handleQuickQuantityChange"
         />
       </div>
 
@@ -290,11 +292,21 @@
       <p class="text-secondary-500 mb-4">
         Füge dein erstes Produkt hinzu oder ändere deine Filter.
       </p>
-      <button class="btn-primary">
+      <button @click="openAddProductModal" class="btn-primary">
         <PlusIcon class="w-5 h-5 mr-2" />
         Erstes Produkt hinzufügen
       </button>
     </div>
+
+    <!-- Product Modal -->
+    <ProductModal
+      v-if="showProductModal"
+      :product="editingProduct"
+      :categories="categoriesStore.categories"
+      :locations="locationsStore.locations"
+      @close="closeProductModal"
+      @save="handleSaveProduct"
+    />
   </div>
 </template>
 
@@ -312,10 +324,12 @@ import {
 } from '@heroicons/vue/24/outline'
 import ProductCard from '@/components/product/ProductCard.vue'
 import ProductTable from '@/components/product/ProductTable.vue'
+import ProductModal from '@/components/product/ProductModal.vue'
 import { useProductsStore } from '@/stores/products'
 import { useSettingsStore } from '@/stores/settings'
 import { useCategoriesStore } from '@/stores/categories'
 import { useLocationsStore } from '@/stores/locations'
+import type { Product, CreateProductRequest } from '@/api/products'
 
 // Props from layout for sidebar filters
 const props = defineProps<{
@@ -335,6 +349,10 @@ const sortBy = ref('name')
 const searchQuery = ref('')
 const currentPage = ref(1)
 const viewMode = ref<'cards' | 'table'>('cards')
+
+// Product Modal State
+const showProductModal = ref(false)
+const editingProduct = ref<Product | null>(null)
 
 // Load products and settings on mount
 onMounted(() => {
@@ -579,10 +597,43 @@ function getDaysUntilExpiration(expirationDate: string): number {
   return Math.ceil(diffTime / (1000 * 60 * 60 * 24))
 }
 
+// Product Modal Handlers
+function openAddProductModal() {
+  editingProduct.value = null
+  showProductModal.value = true
+}
+
+function closeProductModal() {
+  showProductModal.value = false
+  editingProduct.value = null
+}
+
+async function handleSaveProduct(data: CreateProductRequest) {
+  try {
+    if (editingProduct.value) {
+      // Update existing product
+      await productsStore.updateProduct(editingProduct.value.id, data)
+    } else {
+      // Create new product
+      await productsStore.createProduct(data)
+    }
+    closeProductModal()
+    await productsStore.fetchProducts({ size: 1000 })
+  } catch (error) {
+    console.error('Failed to save product:', error)
+  }
+}
+
+
 // Event handlers
 async function editProduct(productId: number) {
-  console.log('Edit product:', productId)
-  // TODO: Open edit modal with product data
+  try {
+    const product = await productsStore.getProduct(productId)
+    editingProduct.value = product
+    showProductModal.value = true
+  } catch (error) {
+    console.error('Failed to load product:', error)
+  }
 }
 
 async function deleteProduct(productId: number) {
@@ -622,4 +673,39 @@ function handlePageSizeChange(event: Event) {
 function handleSort(field: string) {
   sortBy.value = field
 }
+
+async function handleQuickQuantityChange(productId: number, newQuantity: number) {
+  try {
+    // Get the current product to build a complete update request
+    const product = productsStore.getProductById(productId)
+    if (!product) {
+      console.error('Product not found for quantity update')
+      return
+    }
+
+    // Build complete CreateProductRequest for backend validation
+    const updateData: CreateProductRequest = {
+      name: product.name,
+      categoryId: product.category.id,
+      locationId: product.location.id,
+      quantity: newQuantity,
+      unit: product.unit,
+      frozenDate: product.frozenDate.split('T')[0], // Convert to date string
+      expirationDate: product.expirationDate ? product.expirationDate.split('T')[0] : undefined,
+      notes: product.notes || undefined,
+      barcode: product.barcode || undefined
+    }
+
+    await productsStore.updateProduct(productId, updateData)
+  } catch (error) {
+    console.error('Failed to update quantity:', error)
+    // Refresh products to revert any optimistic updates
+    await productsStore.fetchProducts({ size: 1000 })
+  }
+}
+
+// Expose functions for parent component access
+defineExpose({
+  openAddProductModal
+})
 </script>

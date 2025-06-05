@@ -67,9 +67,28 @@
         <span>{{ expirationText }}</span>
       </div>
       
-      <div class="flex items-center">
-        <ScaleIcon class="w-4 h-4 mr-2 flex-shrink-0" />
-        <span>{{ product.quantity }} {{ product.unit }}</span>
+      <div class="flex items-center justify-between">
+        <div class="flex items-center">
+          <ScaleIcon class="w-4 h-4 mr-2 flex-shrink-0" />
+          <span>{{ product.quantity }} {{ product.unit }}</span>
+        </div>
+        
+        <!-- Quick Quantity Controls -->
+        <div class="flex items-center space-x-1">
+          <button
+            @click.stop="handleQuantityDecrease"
+            :disabled="!canDecrease"
+            class="w-6 h-6 rounded-full bg-red-100 text-red-600 hover:bg-red-200 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center text-sm font-medium transition-colors"
+          >
+            −
+          </button>
+          <button
+            @click.stop="handleQuantityIncrease"
+            class="w-6 h-6 rounded-full bg-green-100 text-green-600 hover:bg-green-200 flex items-center justify-center text-sm font-medium transition-colors"
+          >
+            +
+          </button>
+        </div>
       </div>
       
       <div class="flex items-center">
@@ -137,9 +156,27 @@ interface Props {
 }
 
 const props = defineProps<Props>()
-const emit = defineEmits(['edit', 'delete', 'mark-used'])
+const emit = defineEmits(['edit', 'delete', 'mark-used', 'quantity-change'])
 
 const showMenu = ref(false)
+
+// Unit step mapping for quantity adjustments
+const getQuantityStep = (unit: string): number => {
+  switch (unit) {
+    case 'g':
+    case 'ml':
+    case 'Stück':
+    case 'Packung':
+    case 'Dose':
+    case 'Glas':
+      return 1
+    case 'kg':
+    case 'l':
+      return 0.1
+    default:
+      return 0.1
+  }
+}
 
 // Computed properties
 const categoryIcon = computed(() => {
@@ -207,6 +244,11 @@ const expirationText = computed(() => {
   return `Haltbar bis: ${formatDate(props.product.expirationDate)}`
 })
 
+const canDecrease = computed(() => {
+  const step = getQuantityStep(props.product.unit)
+  return props.product.quantity > step
+})
+
 // Helper functions
 function formatDate(dateString: string): string {
   const date = new Date(dateString)
@@ -231,6 +273,21 @@ function handleDelete() {
 function handleMarkUsed() {
   showMenu.value = false
   emit('mark-used', props.product.id)
+}
+
+function handleQuantityIncrease() {
+  const step = getQuantityStep(props.product.unit)
+  const newQuantity = Math.round((props.product.quantity + step) * 10) / 10
+  emit('quantity-change', props.product.id, newQuantity)
+}
+
+function handleQuantityDecrease() {
+  const step = getQuantityStep(props.product.unit)
+  const newQuantity = Math.round((props.product.quantity - step) * 10) / 10
+  
+  if (newQuantity >= step) {
+    emit('quantity-change', props.product.id, newQuantity)
+  }
 }
 </script>
 

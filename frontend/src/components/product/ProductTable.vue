@@ -133,9 +133,28 @@
             
             <!-- Quantity -->
             <td class="px-6 py-4 whitespace-nowrap">
-              <div class="flex items-center">
-                <ScaleIcon class="w-4 h-4 text-secondary-400 mr-2" />
-                <span class="text-sm text-secondary-900">{{ product.quantity }} {{ product.unit }}</span>
+              <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                  <ScaleIcon class="w-4 h-4 text-secondary-400 mr-2" />
+                  <span class="text-sm text-secondary-900">{{ product.quantity }} {{ product.unit }}</span>
+                </div>
+                
+                <!-- Quick Quantity Controls -->
+                <div class="flex items-center space-x-1 ml-2">
+                  <button
+                    @click="handleQuantityDecrease(product)"
+                    :disabled="!canDecrease(product)"
+                    class="w-5 h-5 rounded-full bg-red-100 text-red-600 hover:bg-red-200 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center text-xs font-medium transition-colors"
+                  >
+                    −
+                  </button>
+                  <button
+                    @click="handleQuantityIncrease(product)"
+                    class="w-5 h-5 rounded-full bg-green-100 text-green-600 hover:bg-green-200 flex items-center justify-center text-xs font-medium transition-colors"
+                  >
+                    +
+                  </button>
+                </div>
               </div>
             </td>
             
@@ -256,16 +275,35 @@ defineProps<{
 }>()
 
 // Emits
-defineEmits<{
+const emit = defineEmits<{
   'toggle-view': []
   'sort': [field: string]
   'edit': [id: number]
   'delete': [id: number]
   'mark-used': [id: number]
+  'quantity-change': [id: number, newQuantity: number]
 }>()
 
 // State
 const activeActionsMenu = ref<number | null>(null)
+
+// Unit step mapping for quantity adjustments
+const getQuantityStep = (unit: string): number => {
+  switch (unit) {
+    case 'g':
+    case 'ml':
+    case 'Stück':
+    case 'Packung':
+    case 'Dose':
+    case 'Glas':
+      return 1
+    case 'kg':
+    case 'l':
+      return 0.1
+    default:
+      return 0.1
+  }
+}
 
 // Lifecycle
 onMounted(() => {
@@ -372,5 +410,26 @@ const viewDetails = (product: Product) => {
   // TODO: Implement details view
   console.log('View details for:', product.name)
   closeActionsMenu()
+}
+
+// Quantity management functions
+const canDecrease = (product: Product): boolean => {
+  const step = getQuantityStep(product.unit)
+  return product.quantity > step
+}
+
+const handleQuantityIncrease = (product: Product) => {
+  const step = getQuantityStep(product.unit)
+  const newQuantity = Math.round((product.quantity + step) * 10) / 10
+  emit('quantity-change', product.id, newQuantity)
+}
+
+const handleQuantityDecrease = (product: Product) => {
+  const step = getQuantityStep(product.unit)
+  const newQuantity = Math.round((product.quantity - step) * 10) / 10
+  
+  if (newQuantity >= step) {
+    emit('quantity-change', product.id, newQuantity)
+  }
 }
 </script>
