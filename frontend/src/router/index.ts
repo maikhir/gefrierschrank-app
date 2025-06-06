@@ -3,6 +3,7 @@ import Dashboard from '../views/Dashboard.vue'
 import CategoriesView from '../views/CategoriesView.vue'
 import LocationsView from '../views/LocationsView.vue'
 import SettingsView from '../views/SettingsView.vue'
+import BackupView from '../views/BackupView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -34,6 +35,14 @@ const router = createRouter({
       component: SettingsView,
       meta: {
         title: 'Einstellungen'
+      }
+    },
+    {
+      path: '/backup',
+      name: 'backup',
+      component: BackupView,
+      meta: {
+        title: 'Datensicherung'
       }
     },
   ],

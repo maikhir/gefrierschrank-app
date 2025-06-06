@@ -157,6 +157,14 @@
     <div class="mt-auto p-4 border-t border-secondary-300">
       <nav class="space-y-1">
         <RouterLink
+          to="/backup"
+          class="w-full flex items-center px-3 py-2 text-sm rounded-md text-secondary-600 hover:bg-secondary-50 hover:text-secondary-900 transition-colors"
+          active-class="bg-primary-50 text-primary-700"
+        >
+          <CloudArrowUpIcon class="w-4 h-4 mr-3" />
+          Datensicherung
+        </RouterLink>
+        <RouterLink
           to="/settings"
           class="w-full flex items-center px-3 py-2 text-sm rounded-md text-secondary-600 hover:bg-secondary-50 hover:text-secondary-900 transition-colors"
           active-class="bg-primary-50 text-primary-700"
@@ -172,7 +180,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { RouterLink } from 'vue-router'
-import { MapPinIcon, ExclamationTriangleIcon, XCircleIcon, CogIcon, XMarkIcon } from '@heroicons/vue/24/outline'
+import { MapPinIcon, ExclamationTriangleIcon, XCircleIcon, CogIcon, XMarkIcon, CloudArrowUpIcon } from '@heroicons/vue/24/outline'
 import { useCategoriesStore } from '@/stores/categories'
 import { useLocationsStore } from '@/stores/locations'
 import { useProductsStore } from '@/stores/products'

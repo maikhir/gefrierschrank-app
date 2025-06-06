@@ -235,4 +235,45 @@ public class ProductController {
         
         return builder.build();
     }
+    
+    /**
+     * Update product image
+     */
+    @PutMapping("/{id}/image")
+    public ResponseEntity<ProductDTO> updateProductImage(
+            @PathVariable Long id, 
+            @RequestParam("imageUrl") String imageUrl) {
+        
+        log.info("Updating image for product with id: {}", id);
+        
+        try {
+            Product updatedProduct = productService.updateProductImage(id, imageUrl);
+            return ResponseEntity.ok(convertToDTO(updatedProduct));
+        } catch (IllegalArgumentException e) {
+            log.warn("Product not found with id: {}", id);
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            log.error("Error updating product image", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+    
+    /**
+     * Remove product image
+     */
+    @DeleteMapping("/{id}/image")
+    public ResponseEntity<ProductDTO> removeProductImage(@PathVariable Long id) {
+        log.info("Removing image for product with id: {}", id);
+        
+        try {
+            Product updatedProduct = productService.removeProductImage(id);
+            return ResponseEntity.ok(convertToDTO(updatedProduct));
+        } catch (IllegalArgumentException e) {
+            log.warn("Product not found with id: {}", id);
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            log.error("Error removing product image", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
 }

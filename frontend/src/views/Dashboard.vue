@@ -311,7 +311,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { 
   CheckCircleIcon, 
   ExclamationTriangleIcon, 
@@ -360,6 +360,12 @@ onMounted(() => {
   productsStore.fetchProducts({ size: 1000 })
   categoriesStore.fetchCategories()
   locationsStore.fetchLocations()
+  
+  // Register global function for camera to refresh products
+  window.refreshProductsList = () => {
+    console.log('🔄 Dashboard: Refreshing products list from camera')
+    productsStore.fetchProducts({ size: 1000 })
+  }
 })
 
 // Reset to page 1 when filters change
@@ -703,6 +709,13 @@ async function handleQuickQuantityChange(productId: number, newQuantity: number)
     await productsStore.fetchProducts({ size: 1000 })
   }
 }
+
+// Cleanup global function
+onUnmounted(() => {
+  if (window.refreshProductsList) {
+    delete window.refreshProductsList
+  }
+})
 
 // Expose functions for parent component access
 defineExpose({

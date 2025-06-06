@@ -4,6 +4,7 @@ export default {
     "./index.html",
     "./src/**/*.{vue,js,ts,jsx,tsx}",
   ],
+  darkMode: 'class', // Ändert von 'media' (Standard) zu 'class' für manuelle Kontrolle
   theme: {
     extend: {
       colors: {

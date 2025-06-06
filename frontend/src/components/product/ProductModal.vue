@@ -187,6 +187,24 @@
           </div>
         </div>
 
+        <!-- Product Image -->
+        <div>
+          <label class="block text-sm font-medium text-secondary-700 mb-2">
+            Produktbild
+          </label>
+          <ImageUpload
+            ref="imageUploadRef"
+            :current-image-url="form.imageUrl"
+            alt-text="Produktbild"
+            :allow-delete="true"
+            :mobile-capture="true"
+            @upload="handleImageUpload"
+            @delete="handleImageDelete"
+            @error="handleImageError"
+          />
+          <p v-if="imageError" class="mt-1 text-sm text-red-600">{{ imageError }}</p>
+        </div>
+
 
         <!-- Preview -->
         <div class="bg-secondary-50 rounded-lg p-4 border">
@@ -238,10 +256,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import type { Product, CreateProductRequest } from '@/api/products'
 import type { Category } from '@/api/categories'
 import type { Location } from '@/api/locations'
+import type { ImageUploadResponse } from '@/api/images'
+import { imageApi } from '@/api/images'
+import ImageUpload from '@/components/common/ImageUpload.vue'
 
 // Props
 const props = defineProps<{
@@ -259,6 +280,8 @@ const emit = defineEmits<{
 // State
 const loading = ref(false)
 const errors = ref<Record<string, string>>({})
+const imageError = ref('')
+const imageUploadRef = ref()
 
 // Form data
 const form = ref<CreateProductRequest & { id?: number }>({
@@ -270,7 +293,8 @@ const form = ref<CreateProductRequest & { id?: number }>({
   frozenDate: new Date().toISOString().split('T')[0],
   expirationDate: '',
   notes: '',
-  barcode: ''
+  barcode: '',
+  imageUrl: ''
 })
 
 // Unit options (removed 'Becher')
@@ -336,7 +360,8 @@ watch(() => props.product, (newProduct) => {
       frozenDate: newProduct.frozenDate.split('T')[0],
       expirationDate: newProduct.expirationDate ? newProduct.expirationDate.split('T')[0] : '',
       notes: newProduct.notes || '',
-      barcode: newProduct.barcode || ''
+      barcode: newProduct.barcode || '',
+      imageUrl: newProduct.imageUrl || ''
     }
   } else {
     // Reset form for new product
@@ -349,7 +374,8 @@ watch(() => props.product, (newProduct) => {
       frozenDate: new Date().toISOString().split('T')[0],
       expirationDate: '',
       notes: '',
-      barcode: ''
+      barcode: '',
+      imageUrl: ''
     }
   }
 }, { immediate: true })
@@ -434,7 +460,8 @@ async function handleSubmit() {
       frozenDate: form.value.frozenDate || undefined,
       expirationDate: form.value.expirationDate || undefined,
       notes: form.value.notes?.trim() || undefined,
-      barcode: form.value.barcode?.trim() || undefined
+      barcode: form.value.barcode?.trim() || undefined,
+      imageUrl: form.value.imageUrl || undefined
     }
     
     emit('save', productData)
@@ -445,12 +472,151 @@ async function handleSubmit() {
   }
 }
 
+// Image handlers
+const handleImageUpload = async (result: ImageUploadResponse) => {
+  console.log('🖼️ ProductModal received upload event:', result)
+  imageError.value = ''
+  
+  // If there was an old image, delete it first
+  if (form.value.imageUrl) {
+    try {
+      // Extract filename from old imageUrl
+      const oldFilename = form.value.imageUrl.split('/').pop()?.split('?')[0]
+      if (oldFilename) {
+        await imageApi.deleteImage(oldFilename)
+        console.log('🖼️ Old image deleted:', oldFilename)
+      }
+    } catch (error) {
+      console.warn('Failed to delete old image:', error)
+      // Continue anyway
+    }
+  }
+  
+  // DON'T UPDATE FORM.IMAGEURL YET - this causes re-mount!
+  console.log('🖼️ ProductModal received upload, NOT updating form.imageUrl yet to avoid re-mount')
+  
+  // Instead, directly update the ImageUpload component via ref
+  if (imageUploadRef.value) {
+    console.log('🖼️ Directly updating ImageUpload component via ref')
+    // Access the component's internal methods if available
+    if (imageUploadRef.value.setImageUrl) {
+      imageUploadRef.value.setImageUrl(result.originalUrl)
+    }
+    if (imageUploadRef.value.forceUpdate) {
+      imageUploadRef.value.forceUpdate()
+    }
+  }
+  
+  // Update form.imageUrl only after a delay to avoid immediate re-mount
+  setTimeout(() => {
+    console.log('🖼️ Now updating form.imageUrl after delay')
+    form.value.imageUrl = result.originalUrl
+  }, 100)
+  
+  // Force Vue to re-render by triggering a reactive update
+  await nextTick()
+  console.log('🖼️ NextTick completed, image should be visible now')
+}
+
+const handleImageDelete = () => {
+  imageError.value = ''
+  form.value.imageUrl = ''
+}
+
+const handleImageError = (message: string) => {
+  imageError.value = message
+}
+
 // Initialize form on mount
 onMounted(() => {
   if (props.product) {
     // Form is already initialized via watcher
   } else if (calculatedExpirationDate.value) {
     form.value.expirationDate = calculatedExpirationDate.value
+  }
+  
+  // Check for pending image from camera upload
+  const pendingImage = localStorage.getItem('pendingProductImage')
+  const pendingForNewComponent = window.pendingCameraUploadForNewComponent
+  
+  if (pendingImage) {
+    console.log('📦 Found pending image in localStorage:', pendingImage)
+    form.value.imageUrl = pendingImage
+    localStorage.removeItem('pendingProductImage')
+    console.log('📦 Set form imageUrl and cleared localStorage')
+  } else if (pendingForNewComponent) {
+    console.log('📦 Found pending image for new component:', pendingForNewComponent.url)
+    form.value.imageUrl = pendingForNewComponent.url
+    delete window.pendingCameraUploadForNewComponent
+    console.log('📦 Set form imageUrl from new component pending and cleared')
+  }
+  
+  // Create global reference to this ProductModal instance
+  window.productModalInstance = {
+    handleImageUpload: handleImageUpload,
+    // Add method to prevent modal from closing
+    preventModalClose: () => {
+      console.log('📦 Modal close prevention requested')
+      // This prevents any potential auto-close behavior
+    },
+    // Add direct access to ImageUpload ref
+    updateImageUploadDirectly: (url: string) => {
+      console.log('📦 Direct ImageUpload update requested:', url)
+      if (imageUploadRef.value) {
+        console.log('📦 ImageUpload ref found, calling setImageUrl')
+        if (imageUploadRef.value.setImageUrl) {
+          imageUploadRef.value.setImageUrl(url)
+        }
+        if (imageUploadRef.value.forceUpdate) {
+          imageUploadRef.value.forceUpdate()
+        }
+      } else {
+        console.log('📦 ImageUpload ref not found')
+      }
+    }
+  }
+  console.log('📦 ProductModal instance registered globally')
+  
+  // Create global function for camera to call directly
+  window.updateProductImage = (result) => {
+    console.log('🌍 Global updateProductImage called:', result)
+    handleImageUpload(result)
+  }
+  
+  // Create global function to refresh products after image upload
+  window.refreshProductsAfterImageUpload = async () => {
+    console.log('🔄 Triggering products refresh from ProductModal')
+    // Force immediate re-render by updating the image URL
+    if (form.value.imageUrl) {
+      // Trigger reactivity by updating with a fresh timestamp
+      const currentUrl = form.value.imageUrl
+      if (!currentUrl.includes('?t=')) {
+        form.value.imageUrl = currentUrl + '?t=' + Date.now()
+        await nextTick() // Wait for DOM update
+        console.log('🔄 ProductModal image refreshed with timestamp')
+        
+        // Also try to update any ImageUpload instance after re-mount
+        setTimeout(() => {
+          if (window.activeImageUploadInstance) {
+            console.log('🔄 Updating ImageUpload instance after refresh')
+            window.activeImageUploadInstance.setImageUrl(form.value.imageUrl)
+          }
+        }, 50)
+      }
+    }
+  }
+})
+
+// Cleanup global references
+onUnmounted(() => {
+  if (window.updateProductImage) {
+    delete window.updateProductImage
+  }
+  if (window.productModalInstance) {
+    delete window.productModalInstance
+  }
+  if (window.refreshProductsAfterImageUpload) {
+    delete window.refreshProductsAfterImageUpload
   }
 })
 </script>

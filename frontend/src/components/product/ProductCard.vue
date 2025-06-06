@@ -48,8 +48,22 @@
 
     <!-- Product Image/Icon -->
     <div class="text-center mb-4">
-      <div class="w-16 h-16 mx-auto mb-2 bg-secondary-100 rounded-lg flex items-center justify-center">
-        <component :is="categoryIcon" class="w-8 h-8 text-secondary-500" />
+      <div class="w-16 h-16 mx-auto mb-2 rounded-lg overflow-hidden">
+        <!-- Product Image if available -->
+        <img
+          v-if="product.imageUrl"
+          :src="getImageUrl(product.imageUrl, 'thumbnail')"
+          :alt="product.name"
+          class="w-full h-full object-cover"
+          @error="onImageError"
+        />
+        <!-- Category Icon as fallback -->
+        <div
+          v-else
+          class="w-full h-full bg-secondary-100 flex items-center justify-center"
+        >
+          <component :is="categoryIcon" class="w-8 h-8 text-secondary-500" />
+        </div>
       </div>
       <h3 class="font-semibold text-secondary-900 text-lg">{{ product.name }}</h3>
       <p class="text-sm text-secondary-600">{{ product.category.name }}</p>
@@ -132,6 +146,7 @@ import {
   MapPinIcon,
   DocumentTextIcon
 } from '@heroicons/vue/24/outline'
+import { imageApi } from '@/api/images'
 
 // Category icons - using available icons
 import {
@@ -149,6 +164,7 @@ interface Product {
   frozenDate: string
   expirationDate: string | null
   notes: string | null
+  imageUrl: string | null
 }
 
 interface Props {
@@ -288,6 +304,18 @@ function handleQuantityDecrease() {
   if (newQuantity >= step) {
     emit('quantity-change', props.product.id, newQuantity)
   }
+}
+
+// Image handling
+function getImageUrl(url: string, size: 'thumbnail' | 'medium' | 'original' = 'thumbnail'): string {
+  return imageApi.getImageUrl(url, size)
+}
+
+function onImageError(event: Event) {
+  const img = event.target as HTMLImageElement
+  console.warn('Failed to load product image:', img.src)
+  // Hide the image element when it fails to load
+  img.style.display = 'none'
 }
 </script>
 

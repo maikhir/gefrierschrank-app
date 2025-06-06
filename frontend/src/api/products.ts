@@ -110,3 +110,17 @@ export const getExpiringProducts = async (days: number = 7): Promise<Product[]> 
   const response = await apiClient.get(`/products/expiring?days=${days}`)
   return response.data
 }
+
+// Update product image
+export const updateProductImage = async (productId: number, imageUrl: string): Promise<Product> => {
+  const response = await apiClient.put(`/products/${productId}/image`, null, {
+    params: { imageUrl }
+  })
+  return response.data
+}
+
+// Remove product image
+export const removeProductImage = async (productId: number): Promise<Product> => {
+  const response = await apiClient.delete(`/products/${productId}/image`)
+  return response.data
+}

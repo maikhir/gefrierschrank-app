@@ -26,6 +26,7 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
     private final LocationRepository locationRepository;
+    private final ImageService imageService;
     
     /**
      * Get all products with pagination
@@ -173,8 +174,100 @@ public class ProductService {
         Product product = productRepository.findById(id)
             .orElseThrow(() -> new IllegalArgumentException("Product not found with id: " + id));
         
+        // Delete associated image if exists
+        if (product.getImageUrl() != null && !product.getImageUrl().isEmpty()) {
+            try {
+                // Extract filename from imageUrl (assuming format: /api/images/{filename})
+                String filename = extractFilenameFromUrl(product.getImageUrl());
+                if (filename != null) {
+                    imageService.deleteImage(filename);
+                    log.info("Deleted image {} for product {}", filename, id);
+                }
+            } catch (Exception e) {
+                log.warn("Failed to delete image for product {}: {}", id, e.getMessage());
+            }
+        }
+        
         productRepository.delete(product);
         log.info("Successfully deleted product with id: {}", id);
+    }
+    
+    /**
+     * Update product image
+     */
+    public Product updateProductImage(Long productId, String newImageUrl) {
+        log.info("Updating image for product with id: {}", productId);
+        
+        Product product = productRepository.findById(productId)
+            .orElseThrow(() -> new IllegalArgumentException("Product not found with id: " + productId));
+        
+        // Delete old image if exists
+        if (product.getImageUrl() != null && !product.getImageUrl().isEmpty()) {
+            try {
+                String oldFilename = extractFilenameFromUrl(product.getImageUrl());
+                if (oldFilename != null) {
+                    imageService.deleteImage(oldFilename);
+                    log.info("Deleted old image {} for product {}", oldFilename, productId);
+                }
+            } catch (Exception e) {
+                log.warn("Failed to delete old image for product {}: {}", productId, e.getMessage());
+            }
+        }
+        
+        // Update with new image URL
+        product.setImageUrl(newImageUrl);
+        Product updatedProduct = productRepository.save(product);
+        log.info("Successfully updated image for product with id: {}", productId);
+        return updatedProduct;
+    }
+    
+    /**
+     * Remove product image
+     */
+    public Product removeProductImage(Long productId) {
+        log.info("Removing image for product with id: {}", productId);
+        
+        Product product = productRepository.findById(productId)
+            .orElseThrow(() -> new IllegalArgumentException("Product not found with id: " + productId));
+        
+        // Delete image if exists
+        if (product.getImageUrl() != null && !product.getImageUrl().isEmpty()) {
+            try {
+                String filename = extractFilenameFromUrl(product.getImageUrl());
+                if (filename != null) {
+                    imageService.deleteImage(filename);
+                    log.info("Deleted image {} for product {}", filename, productId);
+                }
+            } catch (Exception e) {
+                log.warn("Failed to delete image for product {}: {}", productId, e.getMessage());
+            }
+        }
+        
+        // Remove image URL
+        product.setImageUrl(null);
+        Product updatedProduct = productRepository.save(product);
+        log.info("Successfully removed image for product with id: {}", productId);
+        return updatedProduct;
+    }
+    
+    private String extractFilenameFromUrl(String imageUrl) {
+        if (imageUrl == null || imageUrl.isEmpty()) {
+            return null;
+        }
+        
+        // Extract filename from URL like "/api/images/{filename}" or "http://host/api/images/{filename}"
+        String[] parts = imageUrl.split("/");
+        if (parts.length > 0) {
+            String lastPart = parts[parts.length - 1];
+            // Remove query parameters if any
+            int queryIndex = lastPart.indexOf('?');
+            if (queryIndex > 0) {
+                lastPart = lastPart.substring(0, queryIndex);
+            }
+            return lastPart;
+        }
+        
+        return null;
     }
     
     /**

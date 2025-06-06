@@ -68,3 +68,4 @@ Thumbs.db
 *.mv.db
 *.trace.db
 backend/data/
+/backend/uploads/

@@ -17,6 +17,11 @@ public interface LocationRepository extends JpaRepository<Location, Long> {
     Optional<Location> findByNameIgnoreCase(String name);
     
     /**
+     * Find location by exact name
+     */
+    Optional<Location> findByName(String name);
+    
+    /**
      * Check if location exists by name (case-insensitive)
      */
     boolean existsByNameIgnoreCase(String name);
